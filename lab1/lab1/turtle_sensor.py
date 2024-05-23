@@ -18,6 +18,7 @@ from sensor_msgs.msg import Image
 import cv2
 from cv_bridge import CvBridge
 from geometry_msgs.msg import Twist
+import os
 
 THRESHOLD = .1
 STOP_TWIST = Twist()
@@ -46,7 +47,12 @@ class echo_camera(Node):
         self.blue_upper = np.array([105, 200, 255])  
         
         # Define current state, which can be 'stop' or 'move'
-        self.cur_state = "stop"   
+        self.cur_state = "stop"
+        self.n_frame = 0  
+        print(os.getcwd())
+        
+        self.root = 'images/'
+        os.makedirs(self.root, exist_ok=True)
     
     # Callback function to echo the video frame being received  
     def echo_topic(self, data):
@@ -55,8 +61,12 @@ class echo_camera(Node):
         
         #Using the CvBridge function imgmsg_to_cv to convert ROS Image to OpenCV image. Now you can use this image to do other OpenCV things
         current_frame = self.br.imgmsg_to_cv2(data)
-
-	# Convert the current frame from RGB to HSV
+        
+        
+        # Convert the current frame from RGB to HSV
+        cv2.imwrite(self.root+str(self.n_frame)+'.png',current_frame)
+        cv2.imshow('frame', current_frame)
+        cv2.waitKey(1)
         hsv = cv2.cvtColor(current_frame, cv2.COLOR_BGR2HSV)
 
         # Create numpy arrays from the boundaries
@@ -92,20 +102,20 @@ class echo_camera(Node):
                 cur_twist = MOVE_TWIST
                 
         # Send twist update to turtle
-        self.publisher_.publish(cur_twist)
+        #self.publisher_.publish(cur_twist)
         
     def shape_detect_from_mask(self, mask):
-    	'''
-    	Function to detect if the mask is rectangular
-    	
-    	Input:
-    		Mask: mask array of size (w, h)
-    	
-    	Output:
-    		Boolean: True if there is an rectangle
-    	'''
-    	
-    	#blur and threshold the mask
+        '''
+        Function to detect if the mask is rectangular
+
+        Input:
+	        Mask: mask array of size (w, h)
+
+        Output:
+	        Boolean: True if there is an rectangle
+        '''
+
+        #blur and threshold the mask
         blurred = cv2.GaussianBlur(mask, (5, 5), 0)
         thresh = cv2.threshold(blurred, 60, 255, cv2.THRESH_BINARY)[1]
         
