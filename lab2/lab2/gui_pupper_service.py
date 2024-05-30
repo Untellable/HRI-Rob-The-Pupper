@@ -83,15 +83,15 @@ class MinimalService(Node):
             time.sleep(self.interval)  
 
         elif (request.command == 'look_down'):
-            orientation_cmd.orientation.y = 0.3
-            orientation_cmd.orientation.w = 0.95
+            orientation_cmd.orientation.y = 0.149
+            orientation_cmd.orientation.w = 0.989
             self.orientation_publisher_.publish(orientation_cmd)
             self.get_logger().info('Publishing: "%s"' % request.command)
             time.sleep(self.interval)
 
         elif (request.command == 'look_up'):
-            orientation_cmd.orientation.y = -0.3
-            orientation_cmd.orientation.w = 0.95
+            orientation_cmd.orientation.y = -0.149
+            orientation_cmd.orientation.w = 0.989
             self.orientation_publisher_.publish(orientation_cmd)
             self.get_logger().info('Publishing: "%s"' % request.command)
             time.sleep(self.interval)
