@@ -13,7 +13,7 @@
 
 # Import the ROS2 interface we wrote, called GoPupper. This specifies the message type.
 from pupper_interfaces.srv import GoPupper
-
+import readchar
 # Import for the touch sensors
 import time
 import RPi.GPIO as GPIO
@@ -131,17 +131,27 @@ def main(args=None):
         touchValue_Right = GPIO.input(touchPin_Right)
         display_string = ''
 
+        key = readchar.readkey()
         # if else chain for changing the state of the pupper based on the touch sensor
-        if not touchValue_Front:
+        if not touchValue_Front or key == "w":
             display_string += 'move_forward'
             imgLoc = '/home/ubuntu/tmp_dir/img_dir/front_new.jpg'
-        elif not touchValue_Right:
-            # display_string += 'move_right'
-            display_string += 'look_up'
+        elif not touchValue_Right or key == "d":
+            display_string += 'move_right'
+            # display_string += 'look_up'
             imgLoc = '/home/ubuntu/tmp_dir/img_dir/right_new.jpg'
-        elif not touchValue_Left:
-            # display_string += 'move_left'
+        elif not touchValue_Left or key == "a":
+            display_string += 'move_left'
+            # display_string += 'look_down'
+            imgLoc = '/home/ubuntu/tmp_dir/img_dir/left_new.jpg'
+        elif key == "z":
+            display_string += 'look_up'
+            imgLoc = '/home/ubuntu/tmp_dir/img_dir/left_new.jpg'
+        elif key == "c":
             display_string += 'look_down'
+            imgLoc = '/home/ubuntu/tmp_dir/img_dir/left_new.jpg'
+        elif key == "c":
+            display_string += 'look_straight'
             imgLoc = '/home/ubuntu/tmp_dir/img_dir/left_new.jpg'
         if display_string == '':
             display_string = 'No button touched'

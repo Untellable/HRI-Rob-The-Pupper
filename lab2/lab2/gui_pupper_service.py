@@ -96,6 +96,13 @@ class MinimalService(Node):
             self.get_logger().info('Publishing: "%s"' % request.command)
             time.sleep(self.interval)
 
+        elif (request.command == 'look_straight'):
+            orientation_cmd.orientation.y = 0.0
+            orientation_cmd.orientation.w = 1.0
+            self.orientation_publisher_.publish(orientation_cmd)
+            self.get_logger().info('Publishing: "%s"' % request.command)
+            time.sleep(self.interval)
+
         elif (request.command == 'turn_right'):
             velocity_cmd.angular.z = -1.0
             self.vel_publisher_.publish(velocity_cmd)
