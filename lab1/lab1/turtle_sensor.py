@@ -9,7 +9,7 @@
 #How to use:
 #Run camera: ros2 launch depthai_ros_driver camera.launch.py
 #Run turtlesim: ros2 run turtlesim turtlesim_node
-#Run publisher: ros2 run lab1 turtle_sensor
+#Run publisher: ros2 run lab2 turtle_sensor
 
 import numpy as np
 import rclpy

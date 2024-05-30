@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-package_name = 'lab1'
+package_name = 'lab2'
 
 setup(
     name=package_name,
@@ -19,7 +19,7 @@ setup(
     license='Apache-2.0',
     tests_require=['pytest'],
     entry_points={
-        'console_scripts': ['turtle_sensor = lab1.turtle_sensor:main',
+        'console_scripts': ['turtle_sensor = lab2.turtle_sensor:main',
         ],
     },
 )
