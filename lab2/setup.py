@@ -20,8 +20,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': ['turtle_sensor = lab2.turtle_sensor:main',
-		            'service = lab2task5.service_go_pupper:main',
-                            'client = lab2task5.client_go_pupper:main',
+		            'service = lab2.service_go_pupper:main',
+                            'client = lab2.client_go_pupper:main',
         ],
     },
 )
