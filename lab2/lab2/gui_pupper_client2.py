@@ -113,7 +113,8 @@ def check_close_quad(im1, im2, n=3):
                 top_quad = quad
                 top_move = move
     move_text = explain_move(top_move, im1.shape)
-    return f"I detect a {threshold_perc(top_score)} match for the {quadrant_names[top_quad]} quadrant if you move {top_move}"
+    #return f"I detect a {threshold_perc(top_score)} match for the {quadrant_names[top_quad]} quadrant if you move {top_move}"
+    return f"I detect a match for the {quadrant_names[top_quad]} quadrant if you move {top_move}"
 
 
 def start_puzzle():
@@ -127,7 +128,7 @@ def start_puzzle():
     puzzle_window.title(f"Puzzle {level.get()}")
     print('hi')
     # Image mask (use an actual image file path in the same folder)
-    image_path = "1-1.png"  # Ensure 'your_image.png' is in the same folder as your script
+    image_path = "/home/ubuntu/HRI-Rob-The-Pupper/lab2/lab2/1-1.png"  # Ensure 'your_image.png' is in the same folder as your script
     # image_path = f"mask_{level.get().lower()}.png"
     img = PhotoImage(file=image_path)
     image_label = tk.Label(puzzle_window, image=img)
@@ -138,11 +139,11 @@ def start_puzzle():
     feedback_text = tk.Text(puzzle_window, height=10, width=30)
     feedback_text.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
     # feedback_text.insert(tk.END, "Feedback will appear here.")
-    im1 = cv2.imread("1-1.png")
-    im2 = cv2.imread("1-1_moved.png")
-    check_close_quad(im1, im2)
+    im1 = cv2.imread("/home/ubuntu/HRI-Rob-The-Pupper/lab2/lab2/1-1.png")
+    im2 = cv2.imread("/home/ubuntu/HRI-Rob-The-Pupper/lab2/lab2/1-1_moved.png")
+    feedback_text = check_close_quad(im1, im2)
 
-    update_feedback("Puzzle started! Good luck.")
+    update_feedback(feedback_text)
 
 
 def update_feedback(message):
@@ -312,7 +313,7 @@ def key_pressed_ros(event):
     if not rclpy.ok():
         minimal_client.destroy_node()
         rclpy.shutdown()
-        
+
     # Obtain input from touch sensors
     touchValue_Front = GPIO.input(touchPin_Front)
     touchValue_Back = GPIO.input(touchPin_Back)
