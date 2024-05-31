@@ -24,6 +24,7 @@ setup(
                             'client = lab2.client_go_pupper:main',
                             'gui_service = lab2.gui_pupper_service:main',
                             'gui_client = lab2.gui_pupper_client:main',
+                            'gui_client2 = lab2.gui_pupper_client2:main',
         ],
     },
 )
