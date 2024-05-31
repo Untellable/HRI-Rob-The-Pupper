@@ -61,6 +61,9 @@ level = tk.StringVar()  # To store the selected difficulty level
 frame = tk.Frame(root)
 frame.pack(pady=20)
 
+#track key press
+root.bind("<Key>", lambda event: print(f"Key pressed: {event.keysym}"))
+
 easy_button = tk.Button(frame, text="Easy", command=lambda: set_level("Easy"))
 easy_button.pack(side=tk.LEFT)
 

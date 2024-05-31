@@ -164,6 +164,7 @@ class MinimalClientAsync(Node):
 #           the passed-in command-line arguments, and logs the results."
 #####
 def main(args=None):
+    global minimal_client
     rclpy.init(args=args)
     minimal_client = MinimalClientAsync()
 
@@ -173,65 +174,65 @@ def main(args=None):
     # This spins up a client node, checks if it's done, throws an exception of there's an issue
     # (Probably a bit redundant with other code and can be simplified. But right now it works, so ¯\_(ツ)_/¯)
     # Feedback loop
-    while rclpy.ok():
+    # while rclpy.ok():
 
-        # Obtain input from touch sensors
-        touchValue_Front = GPIO.input(touchPin_Front)
-        touchValue_Back = GPIO.input(touchPin_Back)
-        touchValue_Left = GPIO.input(touchPin_Left)
-        touchValue_Right = GPIO.input(touchPin_Right)
-        display_string = ''
+    #     # Obtain input from touch sensors
+    #     touchValue_Front = GPIO.input(touchPin_Front)
+    #     touchValue_Back = GPIO.input(touchPin_Back)
+    #     touchValue_Left = GPIO.input(touchPin_Left)
+    #     touchValue_Right = GPIO.input(touchPin_Right)
+    #     display_string = ''
 
-        key = readchar.readkey()
-        # if else chain for changing the state of the pupper based on the touch sensor
-        if not touchValue_Front or key == "w":
-            display_string += 'move_forward'
-            imgLoc = '/home/ubuntu/tmp_dir/img_dir/front_new.jpg'
-        elif not touchValue_Right or key == "d":
-            display_string += 'move_right'
-            # display_string += 'look_up'
-            imgLoc = '/home/ubuntu/tmp_dir/img_dir/right_new.jpg'
-        elif not touchValue_Left or key == "a":
-            display_string += 'move_left'
-            # display_string += 'look_down'
-            imgLoc = '/home/ubuntu/tmp_dir/img_dir/left_new.jpg'
-        elif key == "s":
-            display_string += 'move_backward'
-            imgLoc = '/home/ubuntu/tmp_dir/img_dir/front_new.jpg'
-        elif key == "z":
-            display_string += 'look_up'
-            imgLoc = '/home/ubuntu/tmp_dir/img_dir/left_new.jpg'
-        elif key == "c":
-            display_string += 'look_down'
-            imgLoc = '/home/ubuntu/tmp_dir/img_dir/left_new.jpg'
-        elif key == "x":
-            display_string += 'look_straight'
-            imgLoc = '/home/ubuntu/tmp_dir/img_dir/left_new.jpg'
-        if display_string == '':
-            display_string = 'No button touched'
-            imgLoc = '/home/ubuntu/tmp_dir/img_dir/stop_new.jpg'
-        print(display_string)
+    #     key = readchar.readkey()
+    #     # if else chain for changing the state of the pupper based on the touch sensor
+    #     if not touchValue_Front or key == "w":
+    #         display_string += 'move_forward'
+    #         imgLoc = '/home/ubuntu/tmp_dir/img_dir/front_new.jpg'
+    #     elif not touchValue_Right or key == "d":
+    #         display_string += 'move_right'
+    #         # display_string += 'look_up'
+    #         imgLoc = '/home/ubuntu/tmp_dir/img_dir/right_new.jpg'
+    #     elif not touchValue_Left or key == "a":
+    #         display_string += 'move_left'
+    #         # display_string += 'look_down'
+    #         imgLoc = '/home/ubuntu/tmp_dir/img_dir/left_new.jpg'
+    #     elif key == "s":
+    #         display_string += 'move_backward'
+    #         imgLoc = '/home/ubuntu/tmp_dir/img_dir/front_new.jpg'
+    #     elif key == "z":
+    #         display_string += 'look_up'
+    #         imgLoc = '/home/ubuntu/tmp_dir/img_dir/left_new.jpg'
+    #     elif key == "c":
+    #         display_string += 'look_down'
+    #         imgLoc = '/home/ubuntu/tmp_dir/img_dir/left_new.jpg'
+    #     elif key == "x":
+    #         display_string += 'look_straight'
+    #         imgLoc = '/home/ubuntu/tmp_dir/img_dir/left_new.jpg'
+    #     if display_string == '':
+    #         display_string = 'No button touched'
+    #         imgLoc = '/home/ubuntu/tmp_dir/img_dir/stop_new.jpg'
+    #     print(display_string)
 
-        # Display corresponding image in pupper
-        disp.show_image(imgLoc)
+    #     # Display corresponding image in pupper
+    #     disp.show_image(imgLoc)
 
-        # Send the move request to the service
-        minimal_client.send_move_request(display_string)
+    #     # Send the move request to the service
+    #     minimal_client.send_move_request(display_string)
 
-        # get response and print for each loop
-        rclpy.spin_once(minimal_client)
-        if minimal_client.future.done():
-            try:
-                response = minimal_client.future.result()
-            except Exception as e:
-                minimal_client.get_logger().info(
-                    'Service call failed %r' % (e,))
-            else:
-                minimal_client.get_logger().info(
-                    'Result of command: %s ' %
-                    (response))
-            # break
-        root.mainloop()
+    #     # # get response and print for each loop
+    #     # rclpy.spin_once(minimal_client)
+    #     # if minimal_client.future.done():
+    #     #     try:
+    #     #         response = minimal_client.future.result()
+    #     #     except Exception as e:
+    #     #         minimal_client.get_logger().info(
+    #     #             'Service call failed %r' % (e,))
+    #     #     else:
+    #     #         minimal_client.get_logger().info(
+    #     #             'Result of command: %s ' %
+    #     #             (response))
+    #     #     # break
+    root.mainloop()
 
     # Destroy node and shut down
     minimal_client.destroy_node()
@@ -267,6 +268,50 @@ start_button.pack(pady=20)
 quit_button = tk.Button(root, text="Quit", command=quit_application)
 quit_button.pack(side=tk.RIGHT, pady=20, padx=10)
 
+def key_pressed_ros(event):
+    global minimal_client
+    # Obtain input from touch sensors
+    touchValue_Front = GPIO.input(touchPin_Front)
+    touchValue_Back = GPIO.input(touchPin_Back)
+    touchValue_Left = GPIO.input(touchPin_Left)
+    touchValue_Right = GPIO.input(touchPin_Right)
+    display_string = ''
+    key = event.keysym
+
+    if not touchValue_Front or key == "w":
+        display_string += 'move_forward'
+        imgLoc = '/home/ubuntu/tmp_dir/img_dir/front_new.jpg'
+    elif not touchValue_Right or key == "d":
+        display_string += 'move_right'
+        # display_string += 'look_up'
+        imgLoc = '/home/ubuntu/tmp_dir/img_dir/right_new.jpg'
+    elif not touchValue_Left or key == "a":
+        display_string += 'move_left'
+        # display_string += 'look_down'
+        imgLoc = '/home/ubuntu/tmp_dir/img_dir/left_new.jpg'
+    elif key == "s":
+        display_string += 'move_backward'
+        imgLoc = '/home/ubuntu/tmp_dir/img_dir/front_new.jpg'
+    elif key == "z":
+        display_string += 'look_up'
+        imgLoc = '/home/ubuntu/tmp_dir/img_dir/left_new.jpg'
+    elif key == "c":
+        display_string += 'look_down'
+        imgLoc = '/home/ubuntu/tmp_dir/img_dir/left_new.jpg'
+    elif key == "x":
+        display_string += 'look_straight'
+        imgLoc = '/home/ubuntu/tmp_dir/img_dir/left_new.jpg'
+    if display_string == '':
+        display_string = 'No button touched'
+        imgLoc = '/home/ubuntu/tmp_dir/img_dir/stop_new.jpg'
+
+    # Display corresponding image in pupper
+    disp.show_image(imgLoc)
+
+    # Send the move request to the service
+    minimal_client.send_move_request(display_string)
+
+root.bind("<Key>", key_pressed_ros)    
 
 if __name__ == '__main__':
     main()
