@@ -269,5 +269,7 @@ if __name__ == '__main__':
     quit_button.pack(side=tk.RIGHT, pady=20, padx=10)
 
     root.mainloop()
+
+    print('debug: im here')
     main()
 
