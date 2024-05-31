@@ -214,11 +214,12 @@ quit_button = tk.Button(root, text="Quit", command=quit_application)
 quit_button.pack(side=tk.RIGHT, pady=20, padx=10)
 
 def key_pressed_ros(event):
+    global minimal_client
+
     if not rclpy.ok():
         minimal_client.destroy_node()
         rclpy.shutdown()
-
-    global minimal_client
+        
     # Obtain input from touch sensors
     touchValue_Front = GPIO.input(touchPin_Front)
     touchValue_Back = GPIO.input(touchPin_Back)
