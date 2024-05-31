@@ -144,13 +144,16 @@ def main(args=None):
             display_string += 'move_left'
             # display_string += 'look_down'
             imgLoc = '/home/ubuntu/tmp_dir/img_dir/left_new.jpg'
+        elif key == "s":
+            display_string += 'move_backward'
+            imgLoc = '/home/ubuntu/tmp_dir/img_dir/front_new.jpg'
         elif key == "z":
             display_string += 'look_up'
             imgLoc = '/home/ubuntu/tmp_dir/img_dir/left_new.jpg'
         elif key == "c":
             display_string += 'look_down'
             imgLoc = '/home/ubuntu/tmp_dir/img_dir/left_new.jpg'
-        elif key == "c":
+        elif key == "x":
             display_string += 'look_straight'
             imgLoc = '/home/ubuntu/tmp_dir/img_dir/left_new.jpg'
         if display_string == '':
