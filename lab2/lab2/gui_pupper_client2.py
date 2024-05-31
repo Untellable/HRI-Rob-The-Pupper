@@ -66,6 +66,9 @@ def set_level(selected_level):
         hard_button.config(relief=tk.SUNKEN)
 
 def quit_application():
+    global minimal_client
+    minimal_client.destroy_node()
+    rclpy.shutdown()
     root.destroy()
 
 
@@ -269,6 +272,10 @@ quit_button = tk.Button(root, text="Quit", command=quit_application)
 quit_button.pack(side=tk.RIGHT, pady=20, padx=10)
 
 def key_pressed_ros(event):
+    if not rclpy.ok():
+        minimal_client.destroy_node()
+        rclpy.shutdown()
+
     global minimal_client
     # Obtain input from touch sensors
     touchValue_Front = GPIO.input(touchPin_Front)
