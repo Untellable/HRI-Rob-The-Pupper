@@ -231,6 +231,7 @@ def main(args=None):
                     'Result of command: %s ' %
                     (response))
             # break
+        root.mainloop()
 
     # Destroy node and shut down
     minimal_client.destroy_node()
@@ -265,8 +266,6 @@ start_button.pack(pady=20)
 # Quit button
 quit_button = tk.Button(root, text="Quit", command=quit_application)
 quit_button.pack(side=tk.RIGHT, pady=20, padx=10)
-
-root.mainloop()
 
 
 if __name__ == '__main__':
