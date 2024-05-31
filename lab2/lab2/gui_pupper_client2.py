@@ -17,6 +17,8 @@ import readchar
 # Import for the touch sensors
 import time
 import RPi.GPIO as GPIO
+from feedback import check_close_quad
+import cv2
 
 import tkinter as tk
 from tkinter import messagebox, PhotoImage
@@ -32,8 +34,8 @@ def start_puzzle():
     puzzle_window.title(f"Puzzle {level.get()}")
     print('hi')
     # Image mask (use an actual image file path in the same folder)
-    # image_path = "mask_medium.PNG"  # Ensure 'your_image.png' is in the same folder as your script
-    image_path = f"mask_{level.get().lower()}.png"
+    image_path = "1-1.png"  # Ensure 'your_image.png' is in the same folder as your script
+    # image_path = f"mask_{level.get().lower()}.png"
     img = PhotoImage(file=image_path)
     image_label = tk.Label(puzzle_window, image=img)
     image_label.image = img  # Keep a reference!
@@ -43,7 +45,12 @@ def start_puzzle():
     feedback_text = tk.Text(puzzle_window, height=10, width=30)
     feedback_text.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
     # feedback_text.insert(tk.END, "Feedback will appear here.")
+    im1 = cv2.imread("1-1.png")
+    im2 = cv2.imread("1-1_moved.png")
+    check_close_quad(im1, im2)
+
     update_feedback("Puzzle started! Good luck.")
+
 
 def update_feedback(message):
     """Update the feedback text box with a new message."""
@@ -170,71 +177,6 @@ def main(args=None):
     global minimal_client
     rclpy.init(args=args)
     minimal_client = MinimalClientAsync()
-
-    # debug - comment in/our as needed
-    # print("In client, got this command: %s" % cmd)
-
-    # This spins up a client node, checks if it's done, throws an exception of there's an issue
-    # (Probably a bit redundant with other code and can be simplified. But right now it works, so ¯\_(ツ)_/¯)
-    # Feedback loop
-    # while rclpy.ok():
-
-    #     # Obtain input from touch sensors
-    #     touchValue_Front = GPIO.input(touchPin_Front)
-    #     touchValue_Back = GPIO.input(touchPin_Back)
-    #     touchValue_Left = GPIO.input(touchPin_Left)
-    #     touchValue_Right = GPIO.input(touchPin_Right)
-    #     display_string = ''
-
-    #     key = readchar.readkey()
-    #     # if else chain for changing the state of the pupper based on the touch sensor
-    #     if not touchValue_Front or key == "w":
-    #         display_string += 'move_forward'
-    #         imgLoc = '/home/ubuntu/tmp_dir/img_dir/front_new.jpg'
-    #     elif not touchValue_Right or key == "d":
-    #         display_string += 'move_right'
-    #         # display_string += 'look_up'
-    #         imgLoc = '/home/ubuntu/tmp_dir/img_dir/right_new.jpg'
-    #     elif not touchValue_Left or key == "a":
-    #         display_string += 'move_left'
-    #         # display_string += 'look_down'
-    #         imgLoc = '/home/ubuntu/tmp_dir/img_dir/left_new.jpg'
-    #     elif key == "s":
-    #         display_string += 'move_backward'
-    #         imgLoc = '/home/ubuntu/tmp_dir/img_dir/front_new.jpg'
-    #     elif key == "z":
-    #         display_string += 'look_up'
-    #         imgLoc = '/home/ubuntu/tmp_dir/img_dir/left_new.jpg'
-    #     elif key == "c":
-    #         display_string += 'look_down'
-    #         imgLoc = '/home/ubuntu/tmp_dir/img_dir/left_new.jpg'
-    #     elif key == "x":
-    #         display_string += 'look_straight'
-    #         imgLoc = '/home/ubuntu/tmp_dir/img_dir/left_new.jpg'
-    #     if display_string == '':
-    #         display_string = 'No button touched'
-    #         imgLoc = '/home/ubuntu/tmp_dir/img_dir/stop_new.jpg'
-    #     print(display_string)
-
-    #     # Display corresponding image in pupper
-    #     disp.show_image(imgLoc)
-
-    #     # Send the move request to the service
-    #     minimal_client.send_move_request(display_string)
-
-    #     # # get response and print for each loop
-    #     # rclpy.spin_once(minimal_client)
-    #     # if minimal_client.future.done():
-    #     #     try:
-    #     #         response = minimal_client.future.result()
-    #     #     except Exception as e:
-    #     #         minimal_client.get_logger().info(
-    #     #             'Service call failed %r' % (e,))
-    #     #     else:
-    #     #         minimal_client.get_logger().info(
-    #     #             'Result of command: %s ' %
-    #     #             (response))
-    #     #     # break
     root.mainloop()
 
     # Destroy node and shut down
