@@ -236,40 +236,39 @@ def main(args=None):
     minimal_client.destroy_node()
     rclpy.shutdown()
 
+# Main window
+root = tk.Tk()
+root.title("Rob the Builder")
+
+# Heading
+heading_label = tk.Label(root, text="Rob the Builder", font=("Arial", 24))
+heading_label.pack(pady=20)
+
+# Difficulty level options
+level = tk.StringVar()  # To store the selected difficulty level
+frame = tk.Frame(root)
+frame.pack(pady=20)
+
+easy_button = tk.Button(frame, text="Easy", command=lambda: set_level("Easy"))
+easy_button.pack(side=tk.LEFT)
+
+medium_button = tk.Button(frame, text="Medium", command=lambda: set_level("Medium"))
+medium_button.pack(side=tk.LEFT)
+
+hard_button = tk.Button(frame, text="Hard", command=lambda: set_level("Hard"))
+hard_button.pack(side=tk.LEFT)
+
+# Start button
+start_button = tk.Button(root, text="Start the Puzzle", command=start_puzzle)
+start_button.pack(pady=20)
+
+# Quit button
+quit_button = tk.Button(root, text="Quit", command=quit_application)
+quit_button.pack(side=tk.RIGHT, pady=20, padx=10)
+
+root.mainloop()
+
 
 if __name__ == '__main__':
-    # Main window
-    root = tk.Tk()
-    root.title("Rob the Builder")
-
-    # Heading
-    heading_label = tk.Label(root, text="Rob the Builder", font=("Arial", 24))
-    heading_label.pack(pady=20)
-
-    # Difficulty level options
-    level = tk.StringVar()  # To store the selected difficulty level
-    frame = tk.Frame(root)
-    frame.pack(pady=20)
-
-    easy_button = tk.Button(frame, text="Easy", command=lambda: set_level("Easy"))
-    easy_button.pack(side=tk.LEFT)
-
-    medium_button = tk.Button(frame, text="Medium", command=lambda: set_level("Medium"))
-    medium_button.pack(side=tk.LEFT)
-
-    hard_button = tk.Button(frame, text="Hard", command=lambda: set_level("Hard"))
-    hard_button.pack(side=tk.LEFT)
-
-    # Start button
-    start_button = tk.Button(root, text="Start the Puzzle", command=start_puzzle)
-    start_button.pack(pady=20)
-
-    # Quit button
-    quit_button = tk.Button(root, text="Quit", command=quit_application)
-    quit_button.pack(side=tk.RIGHT, pady=20, padx=10)
-
-    root.mainloop()
-
-    print('debug: im here')
     main()
 
