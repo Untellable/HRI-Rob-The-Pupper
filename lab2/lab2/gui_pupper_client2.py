@@ -139,8 +139,8 @@ def start_puzzle():
     feedback_text = tk.Text(puzzle_window, height=10, width=30)
     feedback_text.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
     # feedback_text.insert(tk.END, "Feedback will appear here.")
-    im1 = cv2.imread("/home/ubuntu/HRI-Rob-The-Pupper/lab2/lab2/1-1.png")
-    im2 = cv2.imread("/home/ubuntu/HRI-Rob-The-Pupper/lab2/lab2/1-1_moved.png")
+    im1 = cv2.imread("/home/ubuntu/HRI-Rob-The-Pupper/lab2/lab2/1-1.png", cv2.IMREAD_UNCHANGED)
+    im2 = cv2.imread("/home/ubuntu/HRI-Rob-The-Pupper/lab2/lab2/1-1_moved.png", cv2.IMREAD_UNCHANGED)
     feedback_text = check_close_quad(im1, im2)
 
     update_feedback(feedback_text)
