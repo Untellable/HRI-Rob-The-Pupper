@@ -141,9 +141,8 @@ def start_puzzle():
     # feedback_text.insert(tk.END, "Feedback will appear here.")
     im1 = cv2.imread("/home/ubuntu/HRI-Rob-The-Pupper/lab2/lab2/1-1.png", cv2.IMREAD_UNCHANGED)
     im2 = cv2.imread("/home/ubuntu/HRI-Rob-The-Pupper/lab2/lab2/1-1_moved.png", cv2.IMREAD_UNCHANGED)
-    feedback_text = check_close_quad(im1, im2)
-
-    update_feedback(feedback_text)
+    text_feedback = check_close_quad(im1, im2)
+    update_feedback(text_feedback)
 
 
 def update_feedback(message):
