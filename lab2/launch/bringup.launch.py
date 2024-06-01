@@ -90,8 +90,14 @@ def launch_bring_up(context, *args, **kwargs):
         arguments=["-d", rviz_config_path],
         condition=IfCondition(rviz)
     )
-
-    return [rviz2_node,
+    
+    ref_body_pos_node = Node(
+        package="mini_pupper_dance",
+        namespace="",
+        executable="pose_controller",
+        name="pose_controller",
+        )
+    return [rviz2_node, ref_body_pos_node,
             bringup_launch]
 
 
