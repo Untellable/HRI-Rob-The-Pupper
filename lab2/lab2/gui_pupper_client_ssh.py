@@ -20,8 +20,6 @@ import RPi.GPIO as GPIO
 import cv2
 import numpy as np
 
-import tkinter as tk
-from tkinter import messagebox, PhotoImage
 
 # When calculating the percent of pixels matching between two images,
 # use these thresholds and labels to describe how close they are
@@ -305,35 +303,6 @@ def main(args=None):
     minimal_client.destroy_node()
     rclpy.shutdown()
 
-# Main window
-root = tk.Tk()
-root.title("Rob the Builder")
-
-# Heading
-heading_label = tk.Label(root, text="Rob the Builder", font=("Arial", 24))
-heading_label.pack(pady=20)
-
-# Difficulty level options
-level = tk.StringVar()  # To store the selected difficulty level
-frame = tk.Frame(root)
-frame.pack(pady=20)
-
-easy_button = tk.Button(frame, text="Easy", command=lambda: set_level("Easy"))
-easy_button.pack(side=tk.LEFT)
-
-medium_button = tk.Button(frame, text="Medium", command=lambda: set_level("Medium"))
-medium_button.pack(side=tk.LEFT)
-
-hard_button = tk.Button(frame, text="Hard", command=lambda: set_level("Hard"))
-hard_button.pack(side=tk.LEFT)
-
-# Start button
-start_button = tk.Button(root, text="Start the Puzzle", command=start_puzzle)
-start_button.pack(pady=20)
-
-# Quit button
-quit_button = tk.Button(root, text="Quit", command=quit_application)
-quit_button.pack(side=tk.RIGHT, pady=20, padx=10)
 
 def key_pressed_ros(event):
     global minimal_client
