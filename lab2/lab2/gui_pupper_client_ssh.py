@@ -115,61 +115,6 @@ def check_close_quad(im1, im2, n=3):
     return f"I detect a match for the {quadrant_names[top_quad]} quadrant if you move {top_move}"
 
 
-def start_puzzle():
-    if not level.get():
-        messagebox.showinfo("Select Level", "Please select a difficulty level!")
-        return
-
-    global feedback_text
-    # Create a new window
-    puzzle_window = tk.Toplevel(root)
-    puzzle_window.title(f"Puzzle {level.get()}")
-    print('hi')
-    # Image mask (use an actual image file path in the same folder)
-    image_path = "/home/ubuntu/HRI-Rob-The-Pupper/lab2/lab2/1-1.png"  # Ensure 'your_image.png' is in the same folder as your script
-    # image_path = f"mask_{level.get().lower()}.png"
-    img = PhotoImage(file=image_path)
-    image_label = tk.Label(puzzle_window, image=img)
-    image_label.image = img  # Keep a reference!
-    image_label.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-
-    # Feedback text box
-    feedback_text = tk.Text(puzzle_window, height=10, width=30)
-    feedback_text.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
-    # feedback_text.insert(tk.END, "Feedback will appear here.")
-    im1 = cv2.imread("/home/ubuntu/HRI-Rob-The-Pupper/lab2/lab2/1-1.png")
-    im2 = cv2.imread("/home/ubuntu/HRI-Rob-The-Pupper/lab2/lab2/1-1_moved.png")
-    feedback_text = check_close_quad(im1, im2)
-
-    update_feedback(feedback_text)
-
-
-def update_feedback(message):
-    """Update the feedback text box with a new message."""
-    if feedback_text:
-        feedback_text.delete('1.0', tk.END)  # Clear existing text
-        feedback_text.insert(tk.END, message)  # Insert new message
-
-def set_level(selected_level):
-    level.set(selected_level)
-    # Reset all buttons to RAISED
-    easy_button.config(relief=tk.RAISED)
-    medium_button.config(relief=tk.RAISED)
-    hard_button.config(relief=tk.RAISED)
-    # Set the selected button to SUNKEN
-    if selected_level == "Easy":
-        easy_button.config(relief=tk.SUNKEN)
-    elif selected_level == "Medium":
-        medium_button.config(relief=tk.SUNKEN)
-    elif selected_level == "Hard":
-        hard_button.config(relief=tk.SUNKEN)
-
-def quit_application():
-    global minimal_client
-    minimal_client.destroy_node()
-    rclpy.shutdown()
-    root.destroy()
-
 
 # There are 4 areas for touch actions
 # Each GPIO to each touch area
@@ -351,8 +296,7 @@ def key_pressed_ros(event):
 
     # Send the move request to the service
     minimal_client.send_move_request(display_string)
-
-root.bind("<Key>", key_pressed_ros)    
+   
 
 if __name__ == '__main__':
     main()
