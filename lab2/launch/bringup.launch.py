@@ -35,8 +35,8 @@ from launch.conditions import IfCondition
 
 def launch_bring_up(context, *args, **kwargs):
     robot_name = LaunchConfiguration("robot_name")
-    sim = LaunchConfiguration("sim")
-    rviz = LaunchConfiguration("rviz")
+    #sim = LaunchConfiguration("sim")
+    #rviz = LaunchConfiguration("rviz")
     joint_hardware_connected = LaunchConfiguration("joint_hardware_connected")
 
     robot_name_str = context.perform_substitution(robot_name)
@@ -67,9 +67,9 @@ def launch_bring_up(context, *args, **kwargs):
     bringup_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(bringup_launch_path),
         launch_arguments={
-            "use_sim_time": sim,
+            "use_sim_time": "false",
             "robot_name": robot_name,
-            "gazebo": sim,
+            "gazebo": "false",
             "rviz": "false",  # set always false to launch RViz2 with costom .rviz file
             "joint_hardware_connected": joint_hardware_connected,
             "publish_foot_contacts": "true",
@@ -82,14 +82,14 @@ def launch_bring_up(context, *args, **kwargs):
         }.items(),
     )
 
-    rviz2_node = Node(
-        package="rviz2",
-        namespace="",
-        executable="rviz2",
-        name="rviz2",
-        arguments=["-d", rviz_config_path],
-        condition=IfCondition(rviz)
-    )
+    #rviz2_node = Node(
+    #    package="rviz2",
+    #    namespace="",
+    #    executable="rviz2",
+    #    name="rviz2",
+    #    arguments=["-d", rviz_config_path],
+    #    condition=IfCondition(rviz)
+    #)
     
     ref_body_pos_node = Node(
         package="mini_pupper_dance",
@@ -97,7 +97,7 @@ def launch_bring_up(context, *args, **kwargs):
         executable="pose_controller",
         name="pose_controller",
         )
-    return [rviz2_node, ref_body_pos_node,
+    return [ref_body_pos_node,
             bringup_launch]
 
 
@@ -117,17 +117,17 @@ def generate_launch_description():
             description='Set robot name for multi robot'
         )
 
-    declare_sim = DeclareLaunchArgument(
-            name='sim',
-            default_value='false',
-            description='Enable use_sime_time to true'
-        )
+    #declare_sim = DeclareLaunchArgument(
+    #        name='sim',
+    #        default_value='false',
+    #        description='Enable use_sime_time to true'
+    #    )
 
-    declare_rviz = DeclareLaunchArgument(
-            name='rviz',
-            default_value='false',
-            description='Run rviz'
-        )
+    #declare_rviz = DeclareLaunchArgument(
+    #        name='rviz',
+    #        default_value='false',
+    #        description='Run rviz'
+    #    )
 
     declare_hardware_connected = DeclareLaunchArgument(
             name='joint_hardware_connected',
@@ -140,15 +140,15 @@ def generate_launch_description():
         condition=IfCondition(joint_hardware_connected),
     )
 
-    lidar_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(lidar_launch_path),
-        condition=IfCondition(joint_hardware_connected),
-    )
+    #lidar_launch = IncludeLaunchDescription(
+    #    PythonLaunchDescriptionSource(lidar_launch_path),
+    #    condition=IfCondition(joint_hardware_connected),
+    #)
 
     return LaunchDescription([
         declare_robot_name,
-        declare_sim,
-        declare_rviz,
+        #declare_sim,
+        # declare_rviz,
         declare_hardware_connected,
         OpaqueFunction(function=launch_bring_up),
         servo_interface_launch,
