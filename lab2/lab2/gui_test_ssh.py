@@ -60,7 +60,7 @@ def key_press(event):
         time_now = time.time()
         #save it to file key.txt
         with open('key.txt', 'w') as f:
-            f.write(time_now + '\n')
+            f.write(str(time_now) + '\n')
             f.write(key)
 
         #scp to pupper
@@ -82,7 +82,7 @@ if __name__ == "__main__":
     frame.pack(pady=20)
 
     #track key press
-    root.bind("<Key>", lambda event: print(f"Key pressed: {event.keysym}"))
+    root.bind("<Key>", key_press)
 
     easy_button = tk.Button(frame, text="Easy", command=lambda: set_level("Easy"))
     easy_button.pack(side=tk.LEFT)
