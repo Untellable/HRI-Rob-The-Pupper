@@ -227,22 +227,30 @@ def main(args=None):
             continue
         if key == 'w':
             minimal_client.send_move_request('move_forward')
+            img_loc = '/home/ubuntu/tmp_dir/img_dir/front_new.jpg'
         elif key == 'a':
             minimal_client.send_move_request('move_left')
+            img_loc = '/home/ubuntu/tmp_dir/img_dir/left_new.jpg'
         elif key == 'd':
             minimal_client.send_move_request('move_right')
+            img_loc = '/home/ubuntu/tmp_dir/img_dir/right_new.jpg'
         elif key == 's':
             minimal_client.send_move_request('move_backward')
+            img_loc = '/home/ubuntu/tmp_dir/img_dir/front_new.jpg'
         elif key == 'z':
             minimal_client.send_move_request('look_up')
+            img_loc = '/home/ubuntu/tmp_dir/img_dir/left_new.jpg'
         elif key == 'c':
             minimal_client.send_move_request('look_down')
+            img_loc = '/home/ubuntu/tmp_dir/img_dir/left_new.jpg'
         elif key == 'x':
             minimal_client.send_move_request('look_straight')
+            img_loc = '/home/ubuntu/tmp_dir/img_dir/left_new.jpg'
         elif key == 'q':
             break
         
         old_time = time
+        disp.show_image(img_loc)
 
     # Destroy node and shut down
     minimal_client.destroy_node()
