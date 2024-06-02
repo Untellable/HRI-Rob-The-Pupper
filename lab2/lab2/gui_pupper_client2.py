@@ -23,20 +23,18 @@ import numpy as np
 import tkinter as tk
 from tkinter import messagebox, PhotoImage
 
-# When calculating the percent of pixels matching between two images,
+# When calculating the percent of pixels matching between two images, 
 # use these thresholds and labels to describe how close they are
 similarity_thresholds = np.array([.6, .8, .9])
-similarity_threshold_labels = ["not similar", "somewhat similar", "similar", "very similar", "matching"]
-
+similarity_threshold_labels = ["not similar", "somewhat similar", "similar", "very similar"]
 quadrant_names = ["top left", "top right", "bottom left", "bottom right"]
 
 
 # Convert similarity percent into string descriptor based on thresholds
-def threshold_text(perc_similar):
+def threshold_perc(perc_similar):
     thresholds_passed = np.sum(perc_similar > similarity_thresholds)
     similarity_description = similarity_threshold_labels[thresholds_passed]
     return similarity_description
-
 
 # Calculate percent shared pixels for each quadrant pair between 2 images
 def compare_quads(im1, im2):
@@ -45,77 +43,103 @@ def compare_quads(im1, im2):
     half_len = side_len // 2
     assert side_len == im2.shape[0]
     comp_results = []
-    for row in [0, half_len]:
-        for col in [0, half_len]:
+    for row in [0,half_len]:
+        for col in [0,half_len]:
             comp_results.append(np.mean(im1[row:row + half_len] == im2[col:col + half_len]))
     return comp_results
 
 
-# Translate an image
+# Move an image 
 # diff: int tuple pair on number of pixels to move horizontally and vertically.
 def move_image(im, diff: tuple[int, int]):
     pad = max(abs(diff[0]), abs(diff[1]))
-    padded_im = np.pad(im, pad, constant_values=-1)
+    # Pads with 2's which aren't in the mask, so padding will never match with any part of the mask
+    padded_im = np.pad(im, pad, constant_values = 2)
     (im_x, im_y) = im.shape
     return padded_im[pad - diff[0]: pad + im_x - diff[0], pad - diff[1]: pad + im_y - diff[1]]
 
-
-# Translate move (numpy array 2 int elements) into a readable text version
+# Translate move (numpy array 2 int elements) into a readable text explanation
 def explain_move(move, im_shape):
-    move_dirs = move > 0
+    move_dirs = (move > 0).astype(np.uint8)
     x_names = ["left", "right"]
     y_names = ["up", "down"]
 
     # Calculate distance to move as percent of image dimensions
-    x_perc = np.rint(100 * abs(move[0] / im_shape[0])).astype(int)
-    y_perc = np.rint(100 * abs(move[1] / im_shape[1])).astype(int)
+    x_perc = np.rint(100 * abs(move[1] / im_shape[1])).astype(int)
+    y_perc = np.rint(100 * abs(move[0] / im_shape[0])).astype(int)
 
     return f"{x_perc}% {x_names[move_dirs[0]]} and {y_perc}% {y_names[move_dirs[1]]}"
+    
 
 
 # Initiate ORB detector
 orb = cv2.ORB_create()
 
-
 # Comparing two images, look for keypoint pairs between them
-# Test if moving the first image to match keypoint pairs would make any of the
+# Test if moving the first image to match keypoint pairs would make any of the 
 # image quadrants match. Only checks for translations, not rotations
 # n is then number of keypoint pair translations to test
 # NOTE: matching performs badly with ~<200x200 images
-def check_close_quad(im1, im2, n=3):
+def check_close_quad(im1, im2, n = 5):
     # find the keypoints and descriptors with ORB
     # Method taken from https://docs.opencv.org/4.x/dc/dc3/tutorial_py_matcher.html
-    kp1, des1 = orb.detectAndCompute(im1, None)
-    kp2, des2 = orb.detectAndCompute(im2, None)
+    kp1, des1 = orb.detectAndCompute(im1,None)
+    kp2, des2 = orb.detectAndCompute(im2,None)
 
     # create BFMatcher object
     bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
-
+     
     # Match descriptors.
-    matches = bf.match(des1, des2)
-
+    matches = bf.match(des1,des2)
+     
     # Sort them in the order of their distance.
-    matches = sorted(matches, key=lambda x: x.distance)
+    matches = sorted(matches, key = lambda x:x.distance)
 
-    top_match_score = 0
-    top_match_quad = 0
-    top_match_move = (0, 0)
-    for i in range(max(n, len(matches))):
+    top_score = 0
+    top_quad = 0
+    top_move = (0,0)
+    for i in range(min(n, len(matches))):
         # Calculate keypoint distance between images for one match
         kp1Idx = matches[i].queryIdx
         kp2Idx = matches[i].trainIdx
-        move = np.rint(kp2[kp2Idx].pt).astype(int) - np.rint(kp1[kp1Idx].pt).astype(int)
+        move = np.flip(np.rint(kp2[kp2Idx].pt).astype(int) - np.rint(kp1[kp1Idx].pt).astype(int))
         quad_scores = compare_quads(move_image(im1, move), im2)
         # Calc best quad match
         for quad in range(4):
-            if quad_scores[quad] > top_match_score:
+            if quad_scores[quad] > top_score:
                 top_score = quad_scores[quad]
                 top_quad = quad
                 top_move = move
+    threshold_text = threshold_perc(top_score)
+    if threshold_text == "not similar":
+        return f"I didn't detect any nearby matches"
     move_text = explain_move(top_move, im1.shape)
-    #return f"I detect a {threshold_perc(top_score)} match for the {quadrant_names[top_quad]} quadrant if you move {top_move}"
-    return f"I detect a match for the {quadrant_names[top_quad]} quadrant if you move {top_move}"
+    return f"I detect a {threshold_text} match for the {quadrant_names[top_quad]} quadrant if you move {move_text}."
 
+# Convert RGB image to binary mask, with slight blurring to reduce noise
+# Range of color for mask creation defaulting to red from lab1
+def camera_to_mask(rgb_im, color_lower = [164, 60, 100], color_upper = [179, 205, 255]):
+	# Convert the current frame from RGB to HSV
+    hsv = cv2.cvtColor(rgb_im, cv2.COLOR_BGR2HSV)
+
+    # Create numpy arrays from the boundaries
+    color_lower = np.array(color_lower,dtype=np.uint8)
+    color_upper = np.array(color_upper,dtype=np.uint8)   
+        
+    color_mask = cv2.inRange(hsv,color_lower,color_upper)
+    blurred = cv2.blur(color_mask, (20,20))
+    _, bw = cv2.threshold(blurred,127,255,cv2.THRESH_OTSU)
+    return bw
+
+# Compare RGB image to mask image
+def compare_to_mask(rgb_im, mask):
+    camera_mask = camera_to_mask(rgb_im)
+    return check_close_quad(camera_mask, mask)
+
+# Takes RGB image, converts it to a mask, and saved at the specified location
+def save_new_mask(rgb_im, save_path):
+    camera_mask = camera_to_mask(rgb_im)
+    cv2.imwrite(save_path, camera_mask)
 
 def start_puzzle():
     if not level.get():
