@@ -12,6 +12,7 @@
 ########
 
 # Import the ROS2 interface we wrote, called GoPupper. This specifies the message type.
+import sounddevice as sd
 from pupper_interfaces.srv import GoPupper
 import readchar
 # Import for the touch sensors
@@ -246,6 +247,9 @@ def main(args=None):
         elif key == 'x':
             minimal_client.send_move_request('look_straight')
             img_loc = '/home/ubuntu/tmp_dir/img_dir/left_new.jpg'
+        elif key == 'f':
+            fs = 44100
+            sd.play('/home/ubuntu/transfer_dir/sound.mp3', fs)
         elif key == 'q':
             break
         
@@ -295,7 +299,7 @@ def key_pressed_ros(event):
     elif key == "x":
         display_string += 'look_straight'
         imgLoc = '/home/ubuntu/tmp_dir/img_dir/left_new.jpg'
-    if display_string == '':
+    else:
         display_string = 'No button touched'
         imgLoc = '/home/ubuntu/tmp_dir/img_dir/stop_new.jpg'
 
