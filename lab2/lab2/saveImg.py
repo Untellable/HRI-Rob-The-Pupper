@@ -10,7 +10,7 @@ class ImageSaverNode(Node):
         super().__init__('image_saver')
         self.subscription = self.create_subscription(
             Image,
-            '/camera/image',
+            '/oak/rgb/image_raw',
             self.listener_callback,
             10)
         self.subscription  # prevent unused variable warning
@@ -23,12 +23,13 @@ class ImageSaverNode(Node):
             cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
             # Save the image
             img_filename = f'camera_image_{self.image_count}.png'
-            cv2.imwrite(img_filename, cv_image)
+            if self.image_count < 3:           
+                cv2.imwrite(img_filename, cv_image)
             self.get_logger().info(f'Saved image {img_filename}')
             self.image_count += 1
         except CvBridgeError as e:
             self.get_logger().error(f'Failed to convert image: {str(e)}')
-
+        
 def main(args=None):
     rclpy.init(args=args)
     image_saver_node = ImageSaverNode()
