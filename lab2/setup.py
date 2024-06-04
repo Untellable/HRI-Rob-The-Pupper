@@ -26,6 +26,7 @@ setup(
                             'gui_client = lab2.gui_pupper_client:main',
                             'gui_client2 = lab2.gui_pupper_client2:main',
                             'gui_client_ssh = lab2.gui_pupper_client_ssh:main',
+                            'saveImg = lab2.saveImg:main',
         ],
     },
 )
