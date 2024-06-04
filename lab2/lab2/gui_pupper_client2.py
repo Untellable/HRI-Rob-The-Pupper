@@ -29,7 +29,27 @@ similarity_thresholds = np.array([.6, .8, .9])
 similarity_threshold_labels = ["not similar", "somewhat similar", "similar", "very similar"]
 quadrant_names = ["top left", "top right", "bottom left", "bottom right"]
 
+# mask the image quadrants
+def mask_quadrants(live_image, mask_image, quad_flags = [True, True, True, True], alpha = 0.5):
+    assert live_image.shape[0] == mask_image.shape[0] and live_image.shape[1] == mask_image.shape[1]
+    height, width = mask_image.shape
 
+    result = np.copy(live_image)
+    mask_image /= 255
+
+    #scale from 0-1 to alpha-1
+    mask_image = (1 - alpha) * mask_image + alpha
+
+    mask_image = np.repeat(mask_image[:, :, np.newaxis], 3, axis=2)
+
+    for i in range(2):
+        for j in range(2):
+            if quad_flags[i * 2 + j]:
+                result[i * height // 2: (i + 1) * height // 2, j * width // 2: (j + 1) * width // 2] *= mask_image[i * height // 2: (i + 1) * height // 2, j * width // 2: (j + 1) * width // 2]
+
+    return result
+
+                   
 # Convert similarity percent into string descriptor based on thresholds
 def threshold_perc(perc_similar):
     thresholds_passed = np.sum(perc_similar > similarity_thresholds)
