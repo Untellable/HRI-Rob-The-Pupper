@@ -55,7 +55,7 @@ def quit_application():
 def key_press(event):
     key = event.keysym
 
-    if key in {'w', 'a', 's', 'd', 'z', 'c', 'x'}:
+    if key in {'w', 'a', 's', 'd', 'z', 'c', 'x', 'f'}:
         print(f"Move: {key}")
         time_now = time.time()
         #save it to file key.txt
