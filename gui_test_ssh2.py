@@ -31,7 +31,7 @@ def start_puzzle():
         messagebox.showinfo("Select Level", "Please select a difficulty level!")
         return
 
-    image_path = f"camera_frame.png"
+    image_path = f"mask.png"
     try:
         cv_img = cv2.imread(image_path)
         if cv_img is None:
