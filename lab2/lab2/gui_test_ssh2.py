@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import messagebox, PhotoImage
 from PIL import Image, ImageTk
 import cv2
+from lab2.lab2.feedback import get_feedback, color_dict_HSV
 
 import os
 import sys
@@ -20,15 +21,17 @@ def end_fullscreen(event=None):
     root.attributes("-fullscreen", False)
 
 def start_puzzle():
+    global mask_image
     if not level.get():
         messagebox.showinfo("Select Level", "Please select a difficulty level!")
         return
 
-    image_path = f"frame0000.jpg"
+    image_path = f"test1.jpg"
     try:
         cv_img = cv2.imread(image_path)
         if cv_img is None:
             raise IOError("Image file not found")
+        mask_image = cv_img.copy()
         resized_cv_img = cv2.resize(cv_img, ( (1280//2, 720//2)))  # Resize the image
         cv_img_rgb = cv2.cvtColor(resized_cv_img, cv2.COLOR_BGR2RGB)
         pil_img = Image.fromarray(cv_img_rgb)
@@ -42,22 +45,34 @@ def start_puzzle():
     mask_level_label.config(text=f"Mask Level: {level.get()}")
 
 def generate_feedback():
+    global curr_image
+    global mask_image
     if not level.get():
         messagebox.showinfo("Select Level and start puzzle", "Please select a difficulty level and start puzzle!")
         return
 
     global count  # Declare count as global to modify it
     count += 1  # Increment count each time feedback is generated
-    feedback_message = f"Check: {count} - Checking puzzle status..."
-    update_feedback(feedback_message)
     update_puzzle_image()
+
+    color_name = "green"
+    color = color_dict_HSV[color_name]
+    # im2 = cv2.imread("test2.jpg")
+    # mask = cv2.imread(f"1_mask_{color_name}.png", cv2.IMREAD_UNCHANGED)
+    img_feedback = get_feedback(curr_image, mask_image, hidden_quads=[0, 1, 2, 3], color_lower=color[1], color_upper=color[0])
+
+    feedback_message = f"Check: {count} - Feedback: {img_feedback}"
+    update_feedback(feedback_message)
+
 
 def update_puzzle_image():
     global image_label
+    global curr_image
     try:
         os.system('rsync ubuntu@' + ip + ':/home/ubuntu/transfer_dir/camera_image.png camera_frame.png')
         image_path = "camera_frame.png"
         cv_img = cv2.imread(image_path)
+        curr_image = cv_img.copy()
         if cv_img is None:
             raise IOError("Image file not found")
         resized_cv_img = cv2.resize(cv_img,( (1280//2, 720//2)))  # Resize the image
@@ -70,6 +85,7 @@ def update_puzzle_image():
         os.system('rsync ubuntu@' + ip + ':/home/ubuntu/transfer_dir/camera_image.png camera_frame.png')
         image_path = "camera_frame.png"
         cv_img = cv2.imread(image_path)
+        curr_image = cv_img.copy()
         if cv_img is None:
             raise IOError("Image file not found")
         resized_cv_img = cv2.resize(cv_img, (1280//2, 720//2))  # Resize the image
@@ -78,6 +94,7 @@ def update_puzzle_image():
         img = ImageTk.PhotoImage(pil_img)
         image_label.configure(image=img)
         image_label.image = img
+
 
 
 
