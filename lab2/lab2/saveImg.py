@@ -4,6 +4,7 @@ from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 import cv2
 import os
+import time
 
 class ImageSaverNode(Node):
     def __init__(self):
@@ -16,6 +17,7 @@ class ImageSaverNode(Node):
         self.subscription  # prevent unused variable warning
         self.bridge = CvBridge()
         self.image_count = 0
+        self.current_time = time.time()
 
     def listener_callback(self, msg):
         try:
@@ -23,9 +25,9 @@ class ImageSaverNode(Node):
             cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
             # Save the image
             img_filename = f'/home/ubuntu/transfer_dir/camera_image.png'
-            if self.image_count % 15 == 0:           
+            if self.current_time - time.time() > 0.2:           
                 cv2.imwrite(img_filename, cv_image)
-                self.image_count = 0
+                self.current_time = time.time()
                 self.get_logger().info(f'Saved image {img_filename}')
             self.image_count += 1
         except CvBridgeError as e:
