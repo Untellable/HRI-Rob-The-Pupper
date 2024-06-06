@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox, PhotoImage
+from PIL import Image, ImageTk
 
 import os
 import sys
@@ -55,7 +56,7 @@ def quit_application():
 def key_press(event):
     key = event.keysym
 
-    if key in {'w', 'a', 's', 'd', 'z', 'c', 'x', 'f'}:
+    if key in {'f'}:
         print(f"Move: {key}")
         time_now = time.time()
         #save it to file key.txt
@@ -65,6 +66,25 @@ def key_press(event):
 
         #scp to pupper
         os.system('scp key.txt ubuntu@' + ip + ':/home/ubuntu/transfer_dir/key.txt')
+
+
+class mainWindow():
+    def __init__(self, window, image_label, ip):
+        self.window = window
+        self.image_label = image_label
+        self.ip = ip
+        self.image_path = "frame.jpg"
+
+        self.set_image()
+
+    def set_image(self):
+        #os.system('scp ubuntu@' + self.ip + ':/home/ubuntu/transfer_dir/frame.jpg .')
+        image = Image.open(image_path)
+        img = ImageTk.PhotoImage(image)
+        self.image_label.configure(image=img)
+        self.image_label.image = img
+        self.window.update()
+        self.window.after(1000, self.set_image)
 
 if __name__ == "__main__":
     ip = sys.argv[1]
@@ -100,5 +120,13 @@ if __name__ == "__main__":
     # Quit button
     quit_button = tk.Button(root, text="Quit", command=quit_application)
     quit_button.pack(side=tk.RIGHT, pady=20, padx=10)
+
+    image_path = "frame.jpg"
+    image = Image.open(image_path)
+    img = ImageTk.PhotoImage(image)
+    image_label = tk.Label(root, image=img)
+    image_label.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+    mainWindow(root, image_label, ip)
 
     root.mainloop()

@@ -22,9 +22,10 @@ class ImageSaverNode(Node):
             # Convert ROS Image message to OpenCV image
             cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
             # Save the image
-            img_filename = f'camera_image_{self.image_count}.png'
-            if self.image_count < 3:           
+            img_filename = f'camera_image.png'
+            if self.image_count % 10 == 0:           
                 cv2.imwrite(img_filename, cv_image)
+                self.image_count = 0
             self.get_logger().info(f'Saved image {img_filename}')
             self.image_count += 1
         except CvBridgeError as e:
