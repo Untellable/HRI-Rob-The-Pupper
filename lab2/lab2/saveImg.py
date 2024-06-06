@@ -26,6 +26,7 @@ class ImageSaverNode(Node):
             if self.image_count % 10 == 0:           
                 cv2.imwrite(img_filename, cv_image)
                 self.image_count = 0
+                
             self.get_logger().info(f'Saved image {img_filename}')
             self.image_count += 1
         except CvBridgeError as e:
