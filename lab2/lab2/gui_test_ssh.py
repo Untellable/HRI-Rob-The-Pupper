@@ -78,12 +78,18 @@ class mainWindow():
         self.set_image()
 
     def set_image(self):
-        #os.system('scp ubuntu@' + self.ip + ':/home/ubuntu/transfer_dir/frame.jpg .')
-        image = Image.open(image_path)
-        img = ImageTk.PhotoImage(image)
-        self.image_label.configure(image=img)
-        self.image_label.image = img
-        self.window.update()
+        try:
+            os.system('scp ubuntu@' + self.ip + ':/home/ubuntu/transfer_dir/camera_image.png camera_frame.png')
+            image = Image.open(image_path)
+
+            #masking code
+            img = ImageTk.PhotoImage(image)
+            self.image_label.configure(image=img)
+            self.image_label.image = img
+            self.window.update()
+        except:
+            self.window.after(10, self.set_image)
+
         self.window.after(1000, self.set_image)
 
 if __name__ == "__main__":
@@ -121,11 +127,21 @@ if __name__ == "__main__":
     quit_button = tk.Button(root, text="Quit", command=quit_application)
     quit_button.pack(side=tk.RIGHT, pady=20, padx=10)
 
-    image_path = "frame.jpg"
-    image = Image.open(image_path)
-    img = ImageTk.PhotoImage(image)
-    image_label = tk.Label(root, image=img)
-    image_label.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+    try:
+        os.system('scp ubuntu@' + ip + ':/home/ubuntu/transfer_dir/camera_image.png camera_frame.png')
+        image_path = "camera_frame.png"
+        image = Image.open(image_path)
+        img = ImageTk.PhotoImage(image)
+        image_label = tk.Label(root, image=img)
+        image_label.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+    except:
+        os.system('scp ubuntu@' + ip + ':/home/ubuntu/transfer_dir/camera_image.png camera_frame.png')
+        image_path = "camera_frame.png"
+        image = Image.open(image_path)
+        img = ImageTk.PhotoImage(image)
+        image_label = tk.Label(root, image=img)
+        image_label.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
 
     mainWindow(root, image_label, ip)
 
