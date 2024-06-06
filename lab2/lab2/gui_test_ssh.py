@@ -88,9 +88,9 @@ class mainWindow():
             self.image_label.image = img
             self.window.update()
         except:
-            self.window.after(10, self.set_image)
+            self.window.after(50, self.set_image)
 
-        self.window.after(1000, self.set_image)
+        self.window.after(500, self.set_image)
 
 if __name__ == "__main__":
     ip = sys.argv[1]
