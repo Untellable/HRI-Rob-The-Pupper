@@ -29,7 +29,7 @@ def start_puzzle():
         cv_img = cv2.imread(image_path)
         if cv_img is None:
             raise IOError("Image file not found")
-        resized_cv_img = cv2.resize(cv_img, (400, 200))  # Resize the image
+        resized_cv_img = cv2.resize(cv_img, ( (1280//2, 720//2)))  # Resize the image
         cv_img_rgb = cv2.cvtColor(resized_cv_img, cv2.COLOR_BGR2RGB)
         pil_img = Image.fromarray(cv_img_rgb)
         img = ImageTk.PhotoImage(pil_img)
@@ -60,7 +60,7 @@ def update_puzzle_image():
         cv_img = cv2.imread(image_path)
         if cv_img is None:
             raise IOError("Image file not found")
-        resized_cv_img = cv2.resize(cv_img, (400, 200))  # Resize the image
+        resized_cv_img = cv2.resize(cv_img,( (1280//2, 720//2)))  # Resize the image
         cv_img_rgb = cv2.cvtColor(resized_cv_img, cv2.COLOR_BGR2RGB)
         pil_img = Image.fromarray(cv_img_rgb)
         img = ImageTk.PhotoImage(pil_img)
@@ -72,7 +72,7 @@ def update_puzzle_image():
         cv_img = cv2.imread(image_path)
         if cv_img is None:
             raise IOError("Image file not found")
-        resized_cv_img = cv2.resize(cv_img, (400, 200))  # Resize the image
+        resized_cv_img = cv2.resize(cv_img, (1280//2, 720//2))  # Resize the image
         cv_img_rgb = cv2.cvtColor(resized_cv_img, cv2.COLOR_BGR2RGB)
         pil_img = Image.fromarray(cv_img_rgb)
         img = ImageTk.PhotoImage(pil_img)
@@ -98,7 +98,7 @@ def quit_application():
 def key_press(event):
     key = event.keysym
 
-    if key in {'f'}:
+    if key in {'w', 'a', 's', 'd', 'z', 'c', 'x', 'f'}:
         print(f"Move: {key}")
         time_now = time.time()
         #save it to file key.txt
@@ -186,10 +186,10 @@ if __name__ == "__main__":
     container = tk.Frame(root)
     container.pack(expand=True, fill=tk.BOTH, padx=20, pady=10)
 
-    image_label = tk.Label(container, height=200, width=400)
+    image_label = tk.Label(container, height=1280, width=720)
     image_label.pack(side=tk.LEFT, padx=10)
 
-    feedback_text = tk.Text(container, height=20, width=50)
+    feedback_text = tk.Text(container, height=20, width=50, font=("Arial", 16))
     feedback_text.pack(side=tk.RIGHT, padx=10)
     feedback_text.config(state=tk.DISABLED)
 
