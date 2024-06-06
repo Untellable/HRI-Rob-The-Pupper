@@ -53,8 +53,9 @@ def generate_feedback():
     update_puzzle_image()
 
 def update_puzzle_image():
+    global image_label
     try:
-        os.system('scp ubuntu@' + ip + ':/home/ubuntu/transfer_dir/camera_image.png camera_frame.png')
+        os.system('rsync ubuntu@' + ip + ':/home/ubuntu/transfer_dir/camera_image.png camera_frame.png')
         image_path = "camera_frame.png"
         cv_img = cv2.imread(image_path)
         if cv_img is None:
@@ -63,10 +64,10 @@ def update_puzzle_image():
         cv_img_rgb = cv2.cvtColor(resized_cv_img, cv2.COLOR_BGR2RGB)
         pil_img = Image.fromarray(cv_img_rgb)
         img = ImageTk.PhotoImage(pil_img)
-        image_label = tk.Label(root, image=img)
-        image_label.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        image_label.configure(image=img)
+        image_label.image = img
     except:
-        os.system('scp ubuntu@' + ip + ':/home/ubuntu/transfer_dir/camera_image.png camera_frame.png')
+        os.system('rsync ubuntu@' + ip + ':/home/ubuntu/transfer_dir/camera_image.png camera_frame.png')
         image_path = "camera_frame.png"
         cv_img = cv2.imread(image_path)
         if cv_img is None:
@@ -75,8 +76,8 @@ def update_puzzle_image():
         cv_img_rgb = cv2.cvtColor(resized_cv_img, cv2.COLOR_BGR2RGB)
         pil_img = Image.fromarray(cv_img_rgb)
         img = ImageTk.PhotoImage(pil_img)
-        image_label = tk.Label(root, image=img)
-        image_label.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        image_label.configure(image=img)
+        image_label.image = img
 
 
 
@@ -105,8 +106,8 @@ def key_press(event):
             f.write(str(time_now) + '\n')
             f.write(key)
 
-        #scp to pupper
-        os.system('scp key.txt ubuntu@' + ip + ':/home/ubuntu/transfer_dir/key.txt')
+        #rsync to pupper
+        os.system('rsync key.txt ubuntu@' + ip + ':/home/ubuntu/transfer_dir/key.txt')
 
 
 class mainWindow():
@@ -120,7 +121,7 @@ class mainWindow():
 
     def set_image(self):
         try:
-            os.system('scp ubuntu@' + self.ip + ':/home/ubuntu/transfer_dir/camera_image.png camera_frame.png')
+            os.system('rsync ubuntu@' + self.ip + ':/home/ubuntu/transfer_dir/camera_image.png camera_frame.png')
             image = Image.open(image_path)
 
             #masking code
@@ -134,6 +135,8 @@ class mainWindow():
         self.window.after(1000, self.set_image)
 
 if __name__ == "__main__":
+
+    global image_label
     ip = sys.argv[1]
     # Main window
     root = tk.Tk()
@@ -185,14 +188,14 @@ if __name__ == "__main__":
     feedback_text.config(state=tk.DISABLED)
 
     try:
-        os.system('scp ubuntu@' + ip + ':/home/ubuntu/transfer_dir/camera_image.png camera_frame.png')
+        os.system('rsync ubuntu@' + ip + ':/home/ubuntu/transfer_dir/camera_image.png camera_frame.png')
         image_path = "camera_frame.png"
         image = Image.open(image_path)
         img = ImageTk.PhotoImage(image)
         # image_label = tk.Label(root, image=img)
         # image_label.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
     except:
-        os.system('scp ubuntu@' + ip + ':/home/ubuntu/transfer_dir/camera_image.png camera_frame.png')
+        os.system('rsync ubuntu@' + ip + ':/home/ubuntu/transfer_dir/camera_image.png camera_frame.png')
         image_path = "camera_frame.png"
         image = Image.open(image_path)
         img = ImageTk.PhotoImage(image)

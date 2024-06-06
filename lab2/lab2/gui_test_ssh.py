@@ -64,8 +64,8 @@ def key_press(event):
             f.write(str(time_now) + '\n')
             f.write(key)
 
-        #scp to pupper
-        os.system('scp key.txt ubuntu@' + ip + ':/home/ubuntu/transfer_dir/key.txt')
+        #rsync to pupper
+        os.system('rsync key.txt ubuntu@' + ip + ':/home/ubuntu/transfer_dir/key.txt')
 
 
 class mainWindow():
@@ -79,7 +79,7 @@ class mainWindow():
 
     def set_image(self):
         try:
-            os.system('scp ubuntu@' + self.ip + ':/home/ubuntu/transfer_dir/camera_image.png camera_frame.png')
+            os.system('rsync ubuntu@' + self.ip + ':/home/ubuntu/transfer_dir/camera_image.png camera_frame.png')
             image = Image.open(image_path)
 
             #masking code
@@ -128,14 +128,14 @@ if __name__ == "__main__":
     quit_button.pack(side=tk.RIGHT, pady=20, padx=10)
 
     try:
-        os.system('scp ubuntu@' + ip + ':/home/ubuntu/transfer_dir/camera_image.png camera_frame.png')
+        os.system('rsync ubuntu@' + ip + ':/home/ubuntu/transfer_dir/camera_image.png camera_frame.png')
         image_path = "camera_frame.png"
         image = Image.open(image_path)
         img = ImageTk.PhotoImage(image)
         image_label = tk.Label(root, image=img)
         image_label.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
     except:
-        os.system('scp ubuntu@' + ip + ':/home/ubuntu/transfer_dir/camera_image.png camera_frame.png')
+        os.system('rsync ubuntu@' + ip + ':/home/ubuntu/transfer_dir/camera_image.png camera_frame.png')
         image_path = "camera_frame.png"
         image = Image.open(image_path)
         img = ImageTk.PhotoImage(image)
