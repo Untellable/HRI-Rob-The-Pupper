@@ -6,7 +6,7 @@ import os
 print(os.getcwd())
 from feedback.feedback import get_feedback, color_dict_HSV
 
-import gTTS
+from gtts import gTTS
 import audio2numpy
 import sounddevice as sd
 import os
