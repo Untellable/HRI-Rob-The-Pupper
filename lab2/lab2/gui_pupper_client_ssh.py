@@ -249,7 +249,7 @@ def main(args=None):
             minimal_client.send_move_request('look_straight')
             img_loc = '/home/ubuntu/tmp_dir/img_dir/left_new.jpg'
         elif key == 'f':
-            x,sr=a2n.audio_from_file("test.mp3")
+            x,sr=a2n.audio_from_file("/home/ubuntu/transfer_dir/sound.mp3")
             sd.play(x, sr)
         elif key == 'q':
             break
