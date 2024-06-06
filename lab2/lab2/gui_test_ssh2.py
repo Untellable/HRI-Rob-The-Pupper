@@ -4,6 +4,9 @@ from PIL import Image, ImageTk
 import cv2
 from lab2.lab2.feedback import get_feedback, color_dict_HSV
 
+import gTTS
+import audio2numpy
+import sounddevice as sd
 import os
 import sys
 import time
@@ -62,6 +65,13 @@ def generate_feedback():
     img_feedback = get_feedback(curr_image, mask_image, hidden_quads=[0, 1, 2, 3], color_lower=color[1], color_upper=color[0])
 
     feedback_message = f"Check: {count} - Feedback: {img_feedback}"
+
+    gTTS_obj = gTTS(text = img_feedback, lang='en')
+    gTTS_obj.save('feedback.mp3')
+
+    x, sr = audio2numpy.audio_from_file('feedback.mp3')
+    sd.play(x, sr)
+    update_feedback(feedback_message)
     update_feedback(feedback_message)
 
 
