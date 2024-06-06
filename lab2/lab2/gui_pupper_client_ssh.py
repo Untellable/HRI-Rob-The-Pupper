@@ -20,6 +20,7 @@ import time
 import RPi.GPIO as GPIO
 import cv2
 import numpy as np
+import audio2numpy as a2n
 
 
 # When calculating the percent of pixels matching between two images,
@@ -248,8 +249,9 @@ def main(args=None):
             minimal_client.send_move_request('look_straight')
             img_loc = '/home/ubuntu/tmp_dir/img_dir/left_new.jpg'
         elif key == 'f':
-            fs = 44100
-            sd.play('/home/ubuntu/transfer_dir/sound.mp3', fs)
+            x,sr=a2n.audio_from_file("/home/ubuntu/transfer_dir/sound.mp3")
+            img_loc = '/home/ubuntu/tmp_dir/img_dir/front_new.jpg'
+            sd.play(x, sr)
         elif key == 'q':
             break
         
