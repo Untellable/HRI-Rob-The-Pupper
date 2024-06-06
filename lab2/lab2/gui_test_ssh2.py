@@ -141,6 +141,12 @@ if __name__ == "__main__":
     # Main window
     root = tk.Tk()
     root.title("Rob the Builder")
+    root.geometry('1000x600')
+
+    is_fullscreen = True
+    root.attributes("-fullscreen", is_fullscreen)
+    root.bind("<F11>", toggle_fullscreen)
+    root.bind("<Escape>", end_fullscreen)
 
     # Heading
     heading_label = tk.Label(root, text="Rob the Builder", font=("Arial", 24))
