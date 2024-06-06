@@ -25,7 +25,7 @@ class ImageSaverNode(Node):
             cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
             # Save the image
             img_filename = f'/home/ubuntu/transfer_dir/camera_image.png'
-            if self.current_time - time.time() > 0.2:           
+            if self.current_time - time.time() > 0.5:           
                 cv2.imwrite(img_filename, cv_image)
                 self.current_time = time.time()
                 self.get_logger().info(f'Saved image {img_filename}')

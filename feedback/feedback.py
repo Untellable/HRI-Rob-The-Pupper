@@ -35,7 +35,7 @@ def compare_quads(im1, im2):
     # Expects images be square and same size
     side_len = im1.shape[0]
     half_len = side_len // 2
-    assert side_len == im2.shape[0]
+    assert side_len == im2.shape[0], "Images must be the same size"
     comp_results = []
     for row in [0,half_len]:
         for col in [0,half_len]:
@@ -45,7 +45,7 @@ def compare_quads(im1, im2):
 
 # Move a 2d image 
 # diff: int tuple pair on number of pixels to move horizontally and vertically.
-def move_mask(im, diff: tuple[int, int]):
+def move_mask(im, diff):
     pad = max(abs(diff[0]), abs(diff[1]))
     # Pads with 2's which aren't in the mask, so padding will never match with any part of the mask
     padded_im = np.pad(im, pad, constant_values = 2)
@@ -146,7 +146,6 @@ def get_feedback(rgb_im, mask, hidden_quads = [0,1,2,3], **kwargs):
     for quad in hidden_quads:
         if scores[quad] >= success_threshold:
             return f"You uncovered the {quadrant_names[quad]} quadrant."
-
     return check_close_quad(camera_mask, mask, hidden_quads)
 
 # Takes RGB image, converts it to a mask, and saved at the specified location
