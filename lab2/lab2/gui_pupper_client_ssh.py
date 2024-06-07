@@ -236,6 +236,12 @@ def main(args=None):
         elif key == 'd':
             minimal_client.send_move_request('turn_right')
             img_loc = '/home/ubuntu/tmp_dir/img_dir/right_new.jpg'
+        elif key == 'q':
+            minimal_client.send_move_request('move_left')
+            img_loc = '/home/ubuntu/tmp_dir/img_dir/left_new.jpg'
+        elif key == 'e':
+            minimal_client.send_move_request('move_right')
+            img_loc = '/home/ubuntu/tmp_dir/img_dir/right_new.jpg'
         elif key == 's':
             minimal_client.send_move_request('move_backward')
             img_loc = '/home/ubuntu/tmp_dir/img_dir/front_new.jpg'

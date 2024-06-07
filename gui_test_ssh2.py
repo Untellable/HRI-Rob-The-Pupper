@@ -25,14 +25,14 @@ def end_fullscreen(event=None):
     root.attributes("-fullscreen", False)
 
 def start_puzzle():
-    global mask_image, hidden_quadrants
-
+    global mask_image, hidden_quadrants, curr_image
+    update_puzzle_image()
     hidden_quadrants = [0, 1, 2, 3]
     if not level.get():
         messagebox.showinfo("Select Level", "Please select a difficulty level!")
         return
 
-    image_path = f"camera_frame.png"
+    image_path = f"mask_true.png"
     try:
         cv_img = cv2.imread(image_path)
         if cv_img is None:
@@ -40,16 +40,12 @@ def start_puzzle():
         mask_image = cv_img.copy()
         color_name = "green"
         color = color_dict_HSV[color_name]
-        mask_image = camera_to_mask(mask_image, color_lower = color[1], color_upper = color[0]) 
-        resized_cv_img = cv2.resize(cv_img, ( (1280//2, 720//2)))  # Resize the image
-        cv_img_rgb = cv2.cvtColor(resized_cv_img, cv2.COLOR_BGR2RGB)
-        pil_img = Image.fromarray(np.uint8(np.zeros(cv_img_rgb.shape)))
-        img = ImageTk.PhotoImage(pil_img)
-        image_label.config(image=img)
-        image_label.image = img
+        mask_image = camera_to_mask(mask_image, color_lower = color[1], color_upper = color[0])
     except IOError as e:
         messagebox.showerror("Image Load Error", str(e))
         return
+    
+    update_image()
 
     mask_level_label.config(text=f"Mask Level: {level.get()}")
 
@@ -65,11 +61,12 @@ def generate_feedback():
     color = color_dict_HSV[color_name]
     # im2 = cv2.imread("test2.jpg")
     # mask = cv2.imread(f"1_mask_{color_name}.png", cv2.IMREAD_UNCHANGED)
-    img_feedback = get_feedback(curr_image, mask_image, hidden_quads=hidden_quadrants, color_lower=color[1], color_upper=color[0])
-    if 'uncovered' in img_feedback:
-        hidden_quadrants.remove(int(img_feedback.split(' ')[-2]))
-    elif 'success' in img_feedback:
-        hidden_quadrants = []
+    img_feedback, hidden_quadrants = get_feedback(curr_image, mask_image, hidden_quads=hidden_quadrants, color_lower=color[1], color_upper=color[0])
+    # if 'uncovered the' in img_feedback:
+    #     hidden_quadrants.remove(int(img_feedback.split(' ')[-2]))
+    # elif 'solution' in img_feedback:
+    #     hidden_quadrants = []
+    #     print('hi')
 
     update_image()
     feedback_message = f"Check: {count} - Feedback: {img_feedback}"
@@ -123,7 +120,7 @@ def update_image():
     quad_flags = [True, True, True, True]
     for quad in hidden_quadrants:
         quad_flags[quad] = False
-    masked_image = mask_quadrants(curr_image, mask_image, quad_flags=[True, True, True, True], alpha=0.5)
+    masked_image = mask_quadrants(curr_image, mask_image, quad_flags=quad_flags, alpha=0.2)
     resized_cv_img = cv2.resize(masked_image,( (1280//2, 720//2)))  # Resize the image
     cv_img_rgb = cv2.cvtColor(resized_cv_img, cv2.COLOR_BGR2RGB)
     pil_img = Image.fromarray(cv_img_rgb)
@@ -139,14 +136,18 @@ def mask_quadrants(live_image, mask_image, quad_flags = [True, True, True, True]
     mask_image = np.float32(mask_image)/255
 
     #scale from 0-1 to alpha-1
-    mask_image = (1 - alpha) * mask_image + alpha
+    mask_image = (1 - alpha*2) * mask_image + alpha*2
 
     mask_image = np.repeat(mask_image[:, :, np.newaxis], 3, axis=2)
+
+    zeros_image = np.ones_like(mask_image)*alpha
 
     for i in range(2):
         for j in range(2):
             if quad_flags[i * 2 + j]:
                 result[i * height // 2: (i + 1) * height // 2, j * width // 2: (j + 1) * width // 2] *= mask_image[i * height // 2: (i + 1) * height // 2, j * width // 2: (j + 1) * width // 2]
+            else:
+                result[i * height // 2: (i + 1) * height // 2, j * width // 2: (j + 1) * width // 2] *= zeros_image[i * height // 2: (i + 1) * height // 2, j * width // 2: (j + 1) * width // 2]
 
     return np.uint8(result)
 
@@ -168,7 +169,7 @@ def quit_application():
 def key_press(event):
     key = event.keysym
 
-    if key in {'w', 'a', 's', 'd', 'z', 'c', 'x', 'f'}:
+    if key in {'w', 'a', 's', 'd', 'z', 'c', 'x', 'f', 'q', 'e'}:
         print(f"Move: {key}")
         time_now = time.time()
         #save it to file key.txt

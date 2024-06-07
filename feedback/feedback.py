@@ -39,7 +39,12 @@ def compare_quads(im1, im2):
     comp_results = []
     for row in [0,half_len]:
         for col in [0,half_len]:
-            comp_results.append(np.mean(im1[row:row + half_len, col:col + half_len] == im2[row:row + half_len, col:col + half_len]))
+            new_mask_quad = im1[row:row + half_len, col:col + half_len]
+            correct_mask_quad = im2[row:row + half_len, col:col + half_len]
+            if np.mean(correct_mask_quad) < .02:
+                comp_results.append(1)
+            else:
+                comp_results.append(np.mean(new_mask_quad[correct_mask_quad != 0]))
     return comp_results
 
 
@@ -139,14 +144,15 @@ def get_feedback(rgb_im, mask, hidden_quads = [0,1,2,3], **kwargs):
     scores = np.array(compare_quads(camera_mask, mask))
     successes = scores >= success_threshold
     if np.all(successes):
-        return "You found the solution, congrats!"
+        return "You found the solution, congrats!", []
 
     if not hidden_quads:
-        return "You've uncovered all the quadrants, I can't help you any further."
+        return "You've uncovered all the quadrants, I can't help you any further.", []
     for quad in hidden_quads:
         if scores[quad] >= success_threshold:
-            return f"You uncovered the {quadrant_names[quad]} quadrant."
-    return check_close_quad(camera_mask, mask, hidden_quads)
+            hidden_quads.remove(quad)
+            return f"You uncovered the {quadrant_names[quad]} quadrant.", hidden_quads
+    return check_close_quad(camera_mask, mask, hidden_quads), hidden_quads
 
 # Takes RGB image, converts it to a mask, and saved at the specified location
 # Can optionally accept color_lower and color_upper to be passed to camera_to_mask
