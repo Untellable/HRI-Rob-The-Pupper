@@ -2,13 +2,11 @@ import tkinter as tk
 from tkinter import messagebox, PhotoImage
 from PIL import Image, ImageTk
 import cv2
-import os
-print(os.getcwd())
-from feedback.feedback import get_feedback, color_dict_HSV
+from feedback.feedback import get_feedback, color_dict_HSV, save_new_mask
 
 from gtts import gTTS
-import audio2numpy
-import sounddevice as sd
+#import audio2numpy
+#import sounddevice as sd
 import os
 import sys
 import time
@@ -31,12 +29,17 @@ def start_puzzle():
         messagebox.showinfo("Select Level", "Please select a difficulty level!")
         return
 
-    image_path = f"mask.png"
+    image_path = f"camera_frame.png"
     try:
         cv_img = cv2.imread(image_path)
         if cv_img is None:
             raise IOError("Image file not found")
         mask_image = cv_img.copy()
+        color_name = "green"
+        color = color_dict_HSV[color_name]
+        save_new_mask(mask_image, f"1_mask_{color_name}.png", color_lower = color[1], color_upper = color[0])
+        mask_image = cv2.imread(f"1_mask_{color_name}.png", cv2.IMREAD_UNCHANGED)
+
         resized_cv_img = cv2.resize(cv_img, ( (1280//2, 720//2)))  # Resize the image
         cv_img_rgb = cv2.cvtColor(resized_cv_img, cv2.COLOR_BGR2RGB)
         pil_img = Image.fromarray(cv_img_rgb)
@@ -46,18 +49,51 @@ def start_puzzle():
     except IOError as e:
         messagebox.showerror("Image Load Error", str(e))
         return
-    except Exception as e:
-        messagebox.showerror("Error", str(e))
-        return
 
     mask_level_label.config(text=f"Mask Level: {level.get()}")
+
+def generate_feedback():
+    global curr_image
+    global mask_image
+    if not level.get():
+        messagebox.showinfo("Select Level and start puzzle", "Please select a difficulty level and start puzzle!")
+        return
+
+    global count  # Declare count as global to modify it
+    count += 1  # Increment count each time feedback is generated
+    update_puzzle_image()
+
+    color_name = "green"
+    color = color_dict_HSV[color_name]
+    # im2 = cv2.imread("test2.jpg")
+    # mask = cv2.imread(f"1_mask_{color_name}.png", cv2.IMREAD_UNCHANGED)
+    img_feedback = get_feedback(curr_image, mask_image, hidden_quads=[0, 1, 2, 3], color_lower=color[1], color_upper=color[0])
+
+    feedback_message = f"Check: {count} - Feedback: {img_feedback}"
+
+    gTTS_obj = gTTS(text = img_feedback, lang='en')
+    gTTS_obj.save('feedback.mp3')
+
+    os.system('rsync feedback.mp3 ubuntu@' + ip + ':/home/ubuntu/transfer_dir/feedback.mp3')
+
+    time_now = time.time()
+    #save it to file key.txt
+    with open('key.txt', 'w') as f:
+        f.write(str(time_now) + '\n')
+        f.write('feedback')
+
+    #rsync to pupper
+    os.system('rsync key.txt ubuntu@' + ip + ':/home/ubuntu/transfer_dir/key.txt')
+
+
+    update_feedback(feedback_message)
 
 
 def update_puzzle_image():
     global image_label
     global curr_image
     try:
-        os.system('scp ubuntu@' + ip + ':/home/ubuntu/transfer_dir/camera_image.png camera_frame.png')
+        os.system('rsync ubuntu@' + ip + ':/home/ubuntu/transfer_dir/camera_image.png camera_frame.png')
         image_path = "camera_frame.png"
         cv_img = cv2.imread(image_path)
         curr_image = cv_img.copy()
@@ -70,8 +106,7 @@ def update_puzzle_image():
         image_label.configure(image=img)
         image_label.image = img
     except:
-        time.sleep(0.2)
-        os.system('scp ubuntu@' + ip + ':/home/ubuntu/transfer_dir/camera_image.png camera_frame.png')
+        os.system('rsync ubuntu@' + ip + ':/home/ubuntu/transfer_dir/camera_image.png camera_frame.png')
         image_path = "camera_frame.png"
         cv_img = cv2.imread(image_path)
         curr_image = cv_img.copy()
@@ -84,29 +119,7 @@ def update_puzzle_image():
         image_label.configure(image=img)
         image_label.image = img
 
-def generate_feedback():
-    global curr_image, mask_image, count
-    if not level.get():
-        messagebox.showinfo("Select Level and start puzzle", "Please select a difficulty level and start puzzle!")
-        return
-    count += 1  # Increment count each time feedback is generated
-    update_puzzle_image()
 
-    color_name = "green"
-    color = color_dict_HSV[color_name]
-    # im2 = cv2.imread("test2.jpg")
-    # mask = cv2.imread(f"1_mask_{color_name}.png", cv2.IMREAD_UNCHANGED)
-    print('hi')
-    img_feedback = get_feedback(curr_image, mask_image, hidden_quads=[0, 1, 2, 3], color_lower=color[1], color_upper=color[0])
-    print('hi')
-    feedback_message = f"Check: {count} - Feedback: {img_feedback}"
-
-    gTTS_obj = gTTS(text = img_feedback, lang='en')
-    gTTS_obj.save('feedback.mp3')
-
-    x, sr = audio2numpy.audio_from_file('feedback.mp3')
-    sd.play(x, sr)
-    update_feedback(feedback_message)
 
 
 def update_feedback(message):
@@ -134,33 +147,9 @@ def key_press(event):
             f.write(str(time_now) + '\n')
             f.write(key)
 
-        #scp to pupper
-        os.system('scp key.txt ubuntu@' + ip + ':/home/ubuntu/transfer_dir/key.txt')
+        #rsync to pupper
+        os.system('rsync key.txt ubuntu@' + ip + ':/home/ubuntu/transfer_dir/key.txt')
 
-
-class mainWindow():
-    def __init__(self, window, image_label, ip):
-        self.window = window
-        self.image_label = image_label
-        self.ip = ip
-        self.image_path = "frame.jpg"
-
-        self.set_image()
-
-    def set_image(self):
-        try:
-            os.system('scp ubuntu@' + self.ip + ':/home/ubuntu/transfer_dir/camera_image.png camera_frame.png')
-            image = Image.open(image_path)
-
-            #masking code
-            img = ImageTk.PhotoImage(image)
-            self.image_label.configure(image=img)
-            self.image_label.image = img
-            self.window.update()
-        except:
-            self.window.after(10, self.set_image)
-
-        self.window.after(1000, self.set_image)
 
 if __name__ == "__main__":
 
@@ -222,14 +211,14 @@ if __name__ == "__main__":
     feedback_text.config(state=tk.DISABLED)
 
     try:
-        os.system('scp ubuntu@' + ip + ':/home/ubuntu/transfer_dir/camera_image.png camera_frame.png')
+        os.system('rsync ubuntu@' + ip + ':/home/ubuntu/transfer_dir/camera_image.png camera_frame.png')
         image_path = "camera_frame.png"
         image = Image.open(image_path)
         img = ImageTk.PhotoImage(image)
         # image_label = tk.Label(root, image=img)
         # image_label.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
     except:
-        os.system('scp ubuntu@' + ip + ':/home/ubuntu/transfer_dir/camera_image.png camera_frame.png')
+        os.system('rsync ubuntu@' + ip + ':/home/ubuntu/transfer_dir/camera_image.png camera_frame.png')
         image_path = "camera_frame.png"
         image = Image.open(image_path)
         img = ImageTk.PhotoImage(image)

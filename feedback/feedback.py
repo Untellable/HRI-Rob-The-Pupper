@@ -158,7 +158,7 @@ if __name__ == '__main__':
 
     #This laods one of my example images and saves a mask of the green in it
     # This only needs to be run once to create a new puzzle mask
-    im1 = cv2.imread("test1.jpg")
+    im1 = cv2.imread("camera_frame.png")
     color_name = "green"
     color = color_dict_HSV[color_name]
     save_new_mask(im1, f"1_mask_{color_name}.png", color_lower = color[1], color_upper = color[0])
@@ -167,7 +167,7 @@ if __name__ == '__main__':
     # This would be run everytime the user gets the robot's feedback. Make sure that the color the mask was 
     # created with is the same color used here.
     # Also the hidden_quads needs to be updated as the player uncovers the quadrants (i.e. it's [] once they've found them all)
-    im2 = cv2.imread("test2.jpg")
+    im2 = cv2.imread("camera_frame.png")
     mask = cv2.imread(f"1_mask_{color_name}.png", cv2.IMREAD_UNCHANGED)
     print(get_feedback(im2, mask, hidden_quads = [0, 1, 2, 3], color_lower = color[1], color_upper = color[0]))
 
