@@ -2,9 +2,7 @@ import tkinter as tk
 from tkinter import messagebox, PhotoImage
 from PIL import Image, ImageTk
 import cv2
-import os
-print(os.getcwd())
-from feedback.feedback import get_feedback, color_dict_HSV
+from feedback.feedback import get_feedback, color_dict_HSV, camera_to_mask
 
 from gtts import gTTS
 #import audio2numpy
@@ -34,15 +32,18 @@ def start_puzzle():
         messagebox.showinfo("Select Level", "Please select a difficulty level!")
         return
 
-    image_path = f"test1.jpg"
+    image_path = f"camera_frame.png"
     try:
         cv_img = cv2.imread(image_path)
         if cv_img is None:
             raise IOError("Image file not found")
         mask_image = cv_img.copy()
+        color_name = "green"
+        color = color_dict_HSV[color_name]
+        mask_image = camera_to_mask(mask_image, color_lower = color[1], color_upper = color[0]) 
         resized_cv_img = cv2.resize(cv_img, ( (1280//2, 720//2)))  # Resize the image
         cv_img_rgb = cv2.cvtColor(resized_cv_img, cv2.COLOR_BGR2RGB)
-        pil_img = Image.fromarray(cv_img_rgb)
+        pil_img = Image.fromarray(np.uint8(np.zeros(cv_img_rgb.shape)))
         img = ImageTk.PhotoImage(pil_img)
         image_label.config(image=img)
         image_label.image = img
@@ -67,6 +68,8 @@ def generate_feedback():
     img_feedback = get_feedback(curr_image, mask_image, hidden_quads=hidden_quadrants, color_lower=color[1], color_upper=color[0])
     if 'uncovered' in img_feedback:
         hidden_quadrants.remove(int(img_feedback.split(' ')[-2]))
+    elif 'success' in img_feedback:
+        hidden_quadrants = []
 
     update_image()
     feedback_message = f"Check: {count} - Feedback: {img_feedback}"
@@ -93,6 +96,7 @@ def update_puzzle_image():
     global image_label, curr_image
     try:
         os.system('rsync ubuntu@' + ip + ':/home/ubuntu/transfer_dir/camera_image.png camera_frame.png')
+        time.sleep(0.2)
         image_path = "camera_frame.png"
         cv_img = cv2.imread(image_path)
         curr_image = cv_img.copy()
@@ -100,6 +104,7 @@ def update_puzzle_image():
             raise IOError("Image file not found")
 
     except:
+        time.sleep(0.2)
         os.system('rsync ubuntu@' + ip + ':/home/ubuntu/transfer_dir/camera_image.png camera_frame.png')
         image_path = "camera_frame.png"
         cv_img = cv2.imread(image_path)
@@ -130,8 +135,8 @@ def mask_quadrants(live_image, mask_image, quad_flags = [True, True, True, True]
     assert live_image.shape[0] == mask_image.shape[0] and live_image.shape[1] == mask_image.shape[1]
     height, width = mask_image.shape
 
-    result = np.copy(live_image)
-    mask_image /= 255
+    result = np.float32(np.copy(live_image))
+    mask_image = np.float32(mask_image)/255
 
     #scale from 0-1 to alpha-1
     mask_image = (1 - alpha) * mask_image + alpha
@@ -143,7 +148,7 @@ def mask_quadrants(live_image, mask_image, quad_flags = [True, True, True, True]
             if quad_flags[i * 2 + j]:
                 result[i * height // 2: (i + 1) * height // 2, j * width // 2: (j + 1) * width // 2] *= mask_image[i * height // 2: (i + 1) * height // 2, j * width // 2: (j + 1) * width // 2]
 
-    return result
+    return np.uint8(result)
 
 
 def update_feedback(message):
