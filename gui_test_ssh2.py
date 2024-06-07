@@ -2,13 +2,16 @@ import tkinter as tk
 from tkinter import messagebox, PhotoImage
 from PIL import Image, ImageTk
 import cv2
-from feedback.feedback import get_feedback, color_dict_HSV, save_new_mask
+import os
+print(os.getcwd())
+from feedback.feedback import get_feedback, color_dict_HSV
 
-from gtts import gTTS
+import gTTS
 #import audio2numpy
 #import sounddevice as sd
 import os
 import sys
+import numpy as np
 import time
 
 count = 0
@@ -24,22 +27,19 @@ def end_fullscreen(event=None):
     root.attributes("-fullscreen", False)
 
 def start_puzzle():
-    global mask_image
+    global mask_image, hidden_quadrants
+
+    hidden_quadrants = [0, 1, 2, 3]
     if not level.get():
         messagebox.showinfo("Select Level", "Please select a difficulty level!")
         return
 
-    image_path = f"camera_frame.png"
+    image_path = f"test1.jpg"
     try:
         cv_img = cv2.imread(image_path)
         if cv_img is None:
             raise IOError("Image file not found")
         mask_image = cv_img.copy()
-        color_name = "green"
-        color = color_dict_HSV[color_name]
-        save_new_mask(mask_image, f"1_mask_{color_name}.png", color_lower = color[1], color_upper = color[0])
-        mask_image = cv2.imread(f"1_mask_{color_name}.png", cv2.IMREAD_UNCHANGED)
-
         resized_cv_img = cv2.resize(cv_img, ( (1280//2, 720//2)))  # Resize the image
         cv_img_rgb = cv2.cvtColor(resized_cv_img, cv2.COLOR_BGR2RGB)
         pil_img = Image.fromarray(cv_img_rgb)
@@ -53,22 +53,22 @@ def start_puzzle():
     mask_level_label.config(text=f"Mask Level: {level.get()}")
 
 def generate_feedback():
-    global curr_image
-    global mask_image
+    global curr_image, mask_image, count, hidden_quadrants
     if not level.get():
         messagebox.showinfo("Select Level and start puzzle", "Please select a difficulty level and start puzzle!")
         return
 
-    global count  # Declare count as global to modify it
     count += 1  # Increment count each time feedback is generated
     update_puzzle_image()
-
     color_name = "green"
     color = color_dict_HSV[color_name]
     # im2 = cv2.imread("test2.jpg")
     # mask = cv2.imread(f"1_mask_{color_name}.png", cv2.IMREAD_UNCHANGED)
-    img_feedback = get_feedback(curr_image, mask_image, hidden_quads=[0, 1, 2, 3], color_lower=color[1], color_upper=color[0])
+    img_feedback = get_feedback(curr_image, mask_image, hidden_quads=hidden_quadrants, color_lower=color[1], color_upper=color[0])
+    if 'uncovered' in img_feedback:
+        hidden_quadrants.remove(int(img_feedback.split(' ')[-2]))
 
+    update_image()
     feedback_message = f"Check: {count} - Feedback: {img_feedback}"
 
     gTTS_obj = gTTS(text = img_feedback, lang='en')
@@ -90,8 +90,7 @@ def generate_feedback():
 
 
 def update_puzzle_image():
-    global image_label
-    global curr_image
+    global image_label, curr_image
     try:
         os.system('rsync ubuntu@' + ip + ':/home/ubuntu/transfer_dir/camera_image.png camera_frame.png')
         image_path = "camera_frame.png"
@@ -99,12 +98,7 @@ def update_puzzle_image():
         curr_image = cv_img.copy()
         if cv_img is None:
             raise IOError("Image file not found")
-        resized_cv_img = cv2.resize(cv_img,( (1280//2, 720//2)))  # Resize the image
-        cv_img_rgb = cv2.cvtColor(resized_cv_img, cv2.COLOR_BGR2RGB)
-        pil_img = Image.fromarray(cv_img_rgb)
-        img = ImageTk.PhotoImage(pil_img)
-        image_label.configure(image=img)
-        image_label.image = img
+
     except:
         os.system('rsync ubuntu@' + ip + ':/home/ubuntu/transfer_dir/camera_image.png camera_frame.png')
         image_path = "camera_frame.png"
@@ -112,14 +106,44 @@ def update_puzzle_image():
         curr_image = cv_img.copy()
         if cv_img is None:
             raise IOError("Image file not found")
-        resized_cv_img = cv2.resize(cv_img, (1280//2, 720//2))  # Resize the image
-        cv_img_rgb = cv2.cvtColor(resized_cv_img, cv2.COLOR_BGR2RGB)
-        pil_img = Image.fromarray(cv_img_rgb)
-        img = ImageTk.PhotoImage(pil_img)
-        image_label.configure(image=img)
-        image_label.image = img
+        # resized_cv_img = cv2.resize(cv_img, (1280//2, 720//2))  # Resize the image
+        # cv_img_rgb = cv2.cvtColor(resized_cv_img, cv2.COLOR_BGR2RGB)
+        # pil_img = Image.fromarray(cv_img_rgb)
+        # img = ImageTk.PhotoImage(pil_img)
+        # image_label.configure(image=img)
+        # image_label.image = img
 
+def update_image():
+    global curr_image, image_label, mask_image, hidden_quadrants
+    quad_flags = [True, True, True, True]
+    for quad in hidden_quadrants:
+        quad_flags[quad] = False
+    masked_image = mask_quadrants(curr_image, mask_image, quad_flags=[True, True, True, True], alpha=0.5)
+    resized_cv_img = cv2.resize(masked_image,( (1280//2, 720//2)))  # Resize the image
+    cv_img_rgb = cv2.cvtColor(resized_cv_img, cv2.COLOR_BGR2RGB)
+    pil_img = Image.fromarray(cv_img_rgb)
+    img = ImageTk.PhotoImage(pil_img)
+    image_label.configure(image=img)
+    image_label.image = img
 
+def mask_quadrants(live_image, mask_image, quad_flags = [True, True, True, True], alpha = 0.5):
+    assert live_image.shape[0] == mask_image.shape[0] and live_image.shape[1] == mask_image.shape[1]
+    height, width = mask_image.shape
+
+    result = np.copy(live_image)
+    mask_image /= 255
+
+    #scale from 0-1 to alpha-1
+    mask_image = (1 - alpha) * mask_image + alpha
+
+    mask_image = np.repeat(mask_image[:, :, np.newaxis], 3, axis=2)
+
+    for i in range(2):
+        for j in range(2):
+            if quad_flags[i * 2 + j]:
+                result[i * height // 2: (i + 1) * height // 2, j * width // 2: (j + 1) * width // 2] *= mask_image[i * height // 2: (i + 1) * height // 2, j * width // 2: (j + 1) * width // 2]
+
+    return result
 
 
 def update_feedback(message):

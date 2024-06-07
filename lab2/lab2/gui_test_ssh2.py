@@ -26,7 +26,9 @@ def end_fullscreen(event=None):
     root.attributes("-fullscreen", False)
 
 def start_puzzle():
-    global mask_image
+    global mask_image, hidden_quadrants
+
+    hidden_quadrants = [0, 1, 2, 3]
     if not level.get():
         messagebox.showinfo("Select Level", "Please select a difficulty level!")
         return
@@ -50,13 +52,11 @@ def start_puzzle():
     mask_level_label.config(text=f"Mask Level: {level.get()}")
 
 def generate_feedback():
-    global curr_image
-    global mask_image
+    global curr_image, mask_image, count, hidden_quadrants
     if not level.get():
         messagebox.showinfo("Select Level and start puzzle", "Please select a difficulty level and start puzzle!")
         return
 
-    global count  # Declare count as global to modify it
     count += 1  # Increment count each time feedback is generated
     update_puzzle_image()
 
@@ -64,7 +64,7 @@ def generate_feedback():
     color = color_dict_HSV[color_name]
     # im2 = cv2.imread("test2.jpg")
     # mask = cv2.imread(f"1_mask_{color_name}.png", cv2.IMREAD_UNCHANGED)
-    img_feedback = get_feedback(curr_image, mask_image, hidden_quads=[0, 1, 2, 3], color_lower=color[1], color_upper=color[0])
+    img_feedback = get_feedback(curr_image, mask_image, hidden_quads=hidden_quadrants, color_lower=color[1], color_upper=color[0])
 
     feedback_message = f"Check: {count} - Feedback: {img_feedback}"
 
