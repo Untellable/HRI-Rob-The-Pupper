@@ -3,14 +3,14 @@ import numpy as np
 
 # When calculating the percent of pixels matching between two images, 
 # use these thresholds and labels to describe how close they are
-similarity_thresholds = np.array([.8, .9, .95])
+similarity_thresholds = np.array([.8, .9, .95])-0.35
 similarity_threshold_labels = ["not similar to", "similar to", "very similar to", "exactly like"]
 
 # Quandrants are ordered left to right then top to bottom
 quadrant_names = ["top left", "top right", "bottom left", "bottom right"]
 
 # Percent of pixels needed to match mask quadrant or full mask to count as a successful solution
-success_threshold = .95
+success_threshold = .15
 
 # HSV color dictionary taken from https://stackoverflow.com/questions/36817133/identifying-the-range-of-a-color-in-hsv-using-opencv
 color_dict_HSV = {'black': [[180, 255, 30], [0, 0, 0]],
@@ -142,8 +142,8 @@ def camera_to_mask(rgb_im, color_lower = [164, 60, 100], color_upper = [179, 205
 def get_feedback(rgb_im, mask, hidden_quads = [0,1,2,3], **kwargs):
     camera_mask = camera_to_mask(rgb_im, **kwargs)
     scores = np.array(compare_quads(camera_mask, mask))
-    successes = scores >= success_threshold
-    if np.all(successes):
+    successes = np.mean(scores) >= success_threshold
+    if successes:
         return "You found the solution, congrats!", []
 
     if not hidden_quads:

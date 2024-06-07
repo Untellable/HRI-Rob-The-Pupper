@@ -3,6 +3,7 @@ from tkinter import messagebox, PhotoImage
 from PIL import Image, ImageTk
 import cv2
 from feedback.feedback import get_feedback, color_dict_HSV, camera_to_mask
+from time import time
 
 from gtts import gTTS
 #import audio2numpy
@@ -38,7 +39,7 @@ def start_puzzle():
         if cv_img is None:
             raise IOError("Image file not found")
         mask_image = cv_img.copy()
-        color_name = "green"
+        color_name = "blue"
         color = color_dict_HSV[color_name]
         mask_image = camera_to_mask(mask_image, color_lower = color[1], color_upper = color[0])
     except IOError as e:
@@ -51,17 +52,22 @@ def start_puzzle():
 
 def generate_feedback():
     global curr_image, mask_image, count, hidden_quadrants
+    t = time.time()
     if not level.get():
         messagebox.showinfo("Select Level and start puzzle", "Please select a difficulty level and start puzzle!")
         return
 
     count += 1  # Increment count each time feedback is generated
     update_puzzle_image()
-    color_name = "green"
+    print(f"update_puzzle_image time: {time.time() - t}")
+    t = time.time()
+    color_name = "blue"
     color = color_dict_HSV[color_name]
     # im2 = cv2.imread("test2.jpg")
     # mask = cv2.imread(f"1_mask_{color_name}.png", cv2.IMREAD_UNCHANGED)
     img_feedback, hidden_quadrants = get_feedback(curr_image, mask_image, hidden_quads=hidden_quadrants, color_lower=color[1], color_upper=color[0])
+    print(f"get_feedback time: {time.time() - t}")
+    t = time.time()
     # if 'uncovered the' in img_feedback:
     #     hidden_quadrants.remove(int(img_feedback.split(' ')[-2]))
     # elif 'solution' in img_feedback:
@@ -69,24 +75,27 @@ def generate_feedback():
     #     print('hi')
 
     update_image()
+    print(f"update_image time: {time.time() - t}")
+    t = time.time()
     feedback_message = f"Check: {count} - Feedback: {img_feedback}"
 
-    gTTS_obj = gTTS(text = img_feedback, lang='en')
-    gTTS_obj.save('feedback.mp3')
+    # gTTS_obj = gTTS(text = img_feedback, lang='en')
+    # gTTS_obj.save('feedback.mp3')
 
-    os.system('rsync feedback.mp3 ubuntu@' + ip + ':/home/ubuntu/transfer_dir/feedback.mp3')
+    # os.system('rsync feedback.mp3 ubuntu@' + ip + ':/home/ubuntu/transfer_dir/feedback.mp3')
 
     time_now = time.time()
     #save it to file key.txt
     with open('key.txt', 'w') as f:
         f.write(str(time_now) + '\n')
-        f.write('feedback')
+        f.write('f')
 
     #rsync to pupper
     os.system('rsync key.txt ubuntu@' + ip + ':/home/ubuntu/transfer_dir/key.txt')
 
 
     update_feedback(feedback_message)
+    print(f"final generate_feedback time: {time.time() - t}")
 
 
 def update_puzzle_image():
