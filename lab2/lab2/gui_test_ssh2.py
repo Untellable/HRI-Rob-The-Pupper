@@ -7,8 +7,8 @@ print(os.getcwd())
 from feedback.feedback import get_feedback, color_dict_HSV
 
 import gTTS
-import audio2numpy
-import sounddevice as sd
+#import audio2numpy
+#import sounddevice as sd
 import os
 import sys
 import time
@@ -71,9 +71,18 @@ def generate_feedback():
     gTTS_obj = gTTS(text = img_feedback, lang='en')
     gTTS_obj.save('feedback.mp3')
 
-    x, sr = audio2numpy.audio_from_file('feedback.mp3')
-    sd.play(x, sr)
-    update_feedback(feedback_message)
+    os.system('rsync feedback.mp3 ubuntu@' + ip + ':/home/ubuntu/transfer_dir/feedback.mp3')
+
+    time_now = time.time()
+    #save it to file key.txt
+    with open('key.txt', 'w') as f:
+        f.write(str(time_now) + '\n')
+        f.write('feedback')
+
+    #rsync to pupper
+    os.system('rsync key.txt ubuntu@' + ip + ':/home/ubuntu/transfer_dir/key.txt')
+
+
     update_feedback(feedback_message)
 
 
