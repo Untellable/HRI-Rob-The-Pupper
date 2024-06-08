@@ -227,6 +227,9 @@ if __name__ == "__main__":
     image_label = tk.Label(container, height=1280, width=720)
     image_label.pack(side=tk.LEFT, padx=10)
 
+    image_desc_label = tk.Label(container, text='Mask Image', image=image_label, compound='center')
+    image_desc_label.pack(side=tk.LEFT, padx=10)
+
     feedback_text = tk.Text(container, height=20, width=50, font=("Arial", 16))
     feedback_text.pack(side=tk.RIGHT, padx=10)
     feedback_text.config(state=tk.DISABLED)
