@@ -10,7 +10,7 @@ similarity_threshold_labels = ["not similar to", "similar to", "very similar to"
 quadrant_names = ["top left", "top right", "bottom left", "bottom right"]
 
 # Percent of pixels needed to match mask quadrant or full mask to count as a successful solution
-success_threshold = .15
+success_threshold = .95
 
 # HSV color dictionary taken from https://stackoverflow.com/questions/36817133/identifying-the-range-of-a-color-in-hsv-using-opencv
 color_dict_HSV = {'black': [[180, 255, 30], [0, 0, 0]],

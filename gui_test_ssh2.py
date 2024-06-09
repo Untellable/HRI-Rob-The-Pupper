@@ -39,7 +39,7 @@ def start_puzzle():
         if cv_img is None:
             raise IOError("Image file not found")
         mask_image = cv_img.copy()
-        color_name = "blue"
+        color_name = "green"
         color = color_dict_HSV[color_name]
         mask_image = camera_to_mask(mask_image, color_lower = color[1], color_upper = color[0])
     except IOError as e:
@@ -61,7 +61,7 @@ def generate_feedback():
     update_puzzle_image()
     print(f"update_puzzle_image time: {time.time() - t}")
     t = time.time()
-    color_name = "blue"
+    color_name = "green"
     color = color_dict_HSV[color_name]
     # im2 = cv2.imread("test2.jpg")
     # mask = cv2.imread(f"1_mask_{color_name}.png", cv2.IMREAD_UNCHANGED)
