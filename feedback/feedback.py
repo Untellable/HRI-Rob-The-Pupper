@@ -1,3 +1,15 @@
+########
+# Author: Anand Kumar, Ben Klingensmith, Niyas Attasseri
+# Name: feedback.py
+#
+# Purpose: RobThePupper. Support functions for the feedback system.
+#
+# Usage: This script is used to compare the camera image to a mask and provide feedback to the user.
+#        python feedback.py
+#        (This script is not meant to be run directly, but rather imported into another script.)
+# Date: 12 June 2024
+########
+
 import cv2
 import numpy as np
 
@@ -76,11 +88,18 @@ def explain_move(move, im_shape):
 # Initiate ORB detector
 orb = cv2.ORB_create()
 
-# Comparing two images, look for keypoint pairs between them
+####
+# Function: check_close_quad
+#
+# Purpose: Comparing two images, look for keypoint pairs between them
 # Test if moving the first image to match keypoint pairs would make any of the 
 # hidden image quadrants match. Only checks for translations, not rotations
 # n is then number of keypoint pair translations to test
 # NOTE: matching performs badly with ~<200x200 images
+#
+# Arguments: im1, im2: 2D numpy arrays representing images
+# Returns: string describing the best move to make the images more similar
+####
 def check_close_quad(im1, im2, hidden_quads = [0,1,2,3], n = 5):
     # find the keypoints and descriptors with ORB
     # Method taken from https://docs.opencv.org/4.x/dc/dc3/tutorial_py_matcher.html
@@ -117,8 +136,17 @@ def check_close_quad(im1, im2, hidden_quads = [0,1,2,3], n = 5):
     move_text = explain_move(top_move, im1.shape)
     return f"If you move the image {move_text}, I think the {quadrant_names[top_quad]} quadrant would look {threshold_text} the mask."
 
-# Convert RGB image to binary mask, with slight blurring to reduce noise
+####
+# Function: camera_to_mask
+#
+# Purpose: Convert an RGB image to a binary mask based on a specified color range
 # Range of color for mask creation defaulting to red from lab1
+#
+# Arguments: rgb_im: 3D numpy array representing an RGB image
+#            color_lower: 3 element list of lower bounds for HSV color range
+#            color_upper: 3 element list of upper bounds for HSV color range
+# Returns: 2D numpy array representing a binary mask of the specified color
+####
 def camera_to_mask(rgb_im, color_lower = [164, 60, 100], color_upper = [179, 205, 255]):
 	# Convert the current frame from RGB to HSV
     hsv = cv2.cvtColor(rgb_im, cv2.COLOR_BGR2HSV)
@@ -136,9 +164,23 @@ def camera_to_mask(rgb_im, color_lower = [164, 60, 100], color_upper = [179, 205
     # inverted[bw == 255] = 0
     return bw
 
+####
+# Function: get_feedback
+#
+# Purpose: Compare the RGB image from the robot's camera to a specified mask
+# Return a message based on the comparison and which quadrants have been revealed
 # Get feedback from robot by comparing the rgb image from its camera to the specified mask
 # hidden quads stores which quadrants haven't been revealed yet.
 # Can optionally accept color_lower and color_upper to be passed to camera_to_mask
+#
+# Arguments: rgb_im: 3D numpy array representing an RGB image
+#            mask: 2D numpy array representing a binary mask
+#            hidden_quads: list of integers representing which quadrants haven't been revealed
+#            color_lower: 3 element list of lower bounds for HSV color range
+#            color_upper: 3 element list of upper bounds for HSV color range
+# Returns: string message describing the comparison and list of hidden quadrants
+###
+
 def get_feedback(rgb_im, mask, hidden_quads = [0,1,2,3], **kwargs):
     camera_mask = camera_to_mask(rgb_im, **kwargs)
     scores = np.array(compare_quads(camera_mask, mask))
@@ -154,8 +196,18 @@ def get_feedback(rgb_im, mask, hidden_quads = [0,1,2,3], **kwargs):
             return f"You uncovered the {quadrant_names[quad]} quadrant.", hidden_quads
     return check_close_quad(camera_mask, mask, hidden_quads), hidden_quads
 
-# Takes RGB image, converts it to a mask, and saved at the specified location
+####
+# Function: save_new_mask
+#
+# Purpose: Takes RGB image, converts it to a mask, and saves at the specified location
 # Can optionally accept color_lower and color_upper to be passed to camera_to_mask
+#
+# Arguments: rgb_im: 3D numpy array representing an RGB image
+#            save_path: string representing the file path to save the mask
+#            color_lower: 3 element list of lower bounds for HSV color range
+#            color_upper: 3 element list of upper bounds for HSV color range
+# Returns: None
+####
 def save_new_mask(rgb_im, save_path, **kwargs):
     camera_mask = camera_to_mask(rgb_im, **kwargs)
     cv2.imwrite(save_path, camera_mask)
